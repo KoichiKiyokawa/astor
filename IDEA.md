@@ -16,3 +16,23 @@
 ```
 git log --oneline -n 1 --format=%B eb5b11a25c
 ```
+
+
+
+## コミットの分類
+
+- 機能追加
+  - Add, Enhance
+- 削除
+  - Delete, remove
+- リファクタリング
+  - Refactor…, rename…, replace, unused …, 
+- バグ修正
+  - 軽微なもの
+    - タイポ fix typo...
+  - 環境依存
+    - テストケースが通るようにする(prevent build failure)→pom.xmlとかだから拡張子で弾ける
+  - アルゴリズム←ここをいかに細分化して、類似度を図れるようにするか
+    - if文の中身、ループの終了条件の修正 fix...
+
+想定：事前にコミットメッセージのルールを決めておいて、それに基づいて
