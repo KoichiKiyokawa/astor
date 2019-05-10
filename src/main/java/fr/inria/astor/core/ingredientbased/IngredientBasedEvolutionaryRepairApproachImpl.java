@@ -39,10 +39,10 @@ import fr.inria.main.evolution.ExtensionPoints;
 import fr.inria.main.evolution.PlugInLoader;
 
 /**
- * Ingredient based-repair approach.
- * 
+ * Ingredient based-repair approach. JGenProgクラスの継承元
+ *
  * @author Matias Martinez, matias.martinez@inria.fr
- * 
+ *
  */
 public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends EvolutionarySearchEngine
 		implements IngredientBasedApproach {
@@ -61,7 +61,7 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 	/**
 	 * By default, it initializes the spoon model. It should not be created before.
 	 * Otherwise, an exception occurs.
-	 * 
+	 *
 	 * @param suspicious
 	 * @throws Exception
 	 */
@@ -92,8 +92,7 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 			if (operatorSelected.needIngredient()) {
 				IngredientBasedOperator ingbasedapproach = (IngredientBasedOperator) operatorSelected;
 
-				Ingredient ingredient = this.ingredientSearchStrategy.getFixIngredient(modificationPoint,
-						operatorSelected);
+				Ingredient ingredient = this.ingredientSearchStrategy.getFixIngredient(modificationPoint, operatorSelected);
 
 				if (ingredient == null) {
 					return null;
@@ -122,11 +121,9 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 						.getIngredientSpace();
 				log.info("Total mod points: " + this.variants.get(0).getModificationPoints().size());
 				space.toJSON(this.getProjectFacade().getProperties().getWorkingDirForSource());
-				Stats.currentStat.getIngredientsStats().toJSON(
-						this.getProjectFacade().getProperties().getWorkingDirRoot(),
+				Stats.currentStat.getIngredientsStats().toJSON(this.getProjectFacade().getProperties().getWorkingDirRoot(),
 						Stats.currentStat.getIngredientsStats().ingredientSpaceSize, "ingredientSpaceSize");
-				Stats.currentStat.getIngredientsStats().toJSON(
-						this.getProjectFacade().getProperties().getWorkingDirRoot(),
+				Stats.currentStat.getIngredientsStats().toJSON(this.getProjectFacade().getProperties().getWorkingDirRoot(),
 						Stats.currentStat.getIngredientsStats().combinationByIngredientSize,
 						"combinationsTemplatesingredientSpaceSize");
 			}
@@ -230,9 +227,8 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 			} else if (ingStrategySt.equals("code-similarity-based")) {
 				ingStrategy = new CloneIngredientSearchStrategy(ingredientspace);
 			} else {
-				ingStrategy = (IngredientSearchStrategy) PlugInLoader.loadPlugin(
-						ExtensionPoints.INGREDIENT_SEARCH_STRATEGY, new Class[] { IngredientPool.class },
-						new Object[] { ingredientspace });
+				ingStrategy = (IngredientSearchStrategy) PlugInLoader.loadPlugin(ExtensionPoints.INGREDIENT_SEARCH_STRATEGY,
+						new Class[] { IngredientPool.class }, new Object[] { ingredientspace });
 			}
 		} else {
 			ingStrategy = new SimpleRandomSelectionIngredientStrategy(ingredientspace);
@@ -309,14 +305,12 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 
 		super.setParticularStats(hunk, genOperationInstance);
 		hunk.getStats().put(HunkStatEnum.INGREDIENT_SCOPE,
-				((genOperationInstance.getIngredientScope() != null) ? genOperationInstance.getIngredientScope()
-						: "-"));
+				((genOperationInstance.getIngredientScope() != null) ? genOperationInstance.getIngredientScope() : "-"));
 
 		if (genOperationInstance.getIngredient() != null) {
 
 			if (genOperationInstance.getIngredient().getDerivedFrom() != null)
-				hunk.getStats().put(HunkStatEnum.INGREDIENT_PARENT,
-						genOperationInstance.getIngredient().getDerivedFrom());
+				hunk.getStats().put(HunkStatEnum.INGREDIENT_PARENT, genOperationInstance.getIngredient().getDerivedFrom());
 			else {
 				hunk.getStats().put(HunkStatEnum.INGREDIENT_PARENT, genOperationInstance.getIngredient());
 			}

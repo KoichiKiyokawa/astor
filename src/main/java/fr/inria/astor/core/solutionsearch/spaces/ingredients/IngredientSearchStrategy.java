@@ -8,17 +8,17 @@ import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 /**
  * Abstract class that represent a strategy to pick an ingredient from the
  * search space. Astor interacts using this interface for demanding ingredients.
- * 
+ *
  * @author Matias Martinez
  *
  */
-public abstract class IngredientSearchStrategy implements  AstorExtensionPoint {
+public abstract class IngredientSearchStrategy implements AstorExtensionPoint {
 
 	protected IngredientPool ingredientSpace = null;
 
 	/**
-	 * The strategy receives as parameter the FixSpace
-	 * 
+	 * The strategy receives as parameter the FixSpace 初期化時に素材の候補を受けとる
+	 *
 	 * @param space
 	 */
 	public IngredientSearchStrategy(IngredientPool space) {
@@ -29,15 +29,12 @@ public abstract class IngredientSearchStrategy implements  AstorExtensionPoint {
 	/**
 	 * Method that returns an Ingredient from the ingredient space given a
 	 * modification point and a Operator
-	 * 
-	 * @param modificationPoint
-	 *            point to be modified using an ingredient
-	 * @param operationType
-	 *            operation applied to the modif point
+	 *
+	 * @param modificationPoint point to be modified using an ingredient
+	 * @param operationType     operation applied to the modif point
 	 * @return an ingredient
 	 */
-	public abstract Ingredient getFixIngredient(ModificationPoint modificationPoint, 
-			AstorOperator operationType);
+	public abstract Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType);
 
 	public IngredientPool getIngredientSpace() {
 		return ingredientSpace;
