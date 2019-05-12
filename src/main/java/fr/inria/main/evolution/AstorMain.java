@@ -20,6 +20,7 @@ import fr.inria.astor.approaches.jgenprog.JGenProg;
 import fr.inria.astor.approaches.jkali.JKaliEngine;
 import fr.inria.astor.approaches.jmutrepair.MutationalExhaustiveRepair;
 import fr.inria.astor.approaches.scaffold.ScaffoldRepairEngine;
+import fr.inria.astor.approaches.levenshtein.LevenshteinApproach;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
 import fr.inria.astor.core.ingredientbased.ExhaustiveIngredientBasedEngine;
@@ -34,7 +35,7 @@ import fr.inria.main.ExecutionMode;
 
 /**
  * Astor main
- * 
+ *
  * @author Matias Martinez, matias.martinez@inria.fr
  *
  */
@@ -47,8 +48,7 @@ public class AstorMain extends AbstractMain {
 	public void initProject(String location, String projectName, String dependencies, String packageToInstrument,
 			double thfl, String failing) throws Exception {
 
-		List<String> failingList = (failing != null) ? Arrays.asList(failing.split(File.pathSeparator))
-				: new ArrayList<>();
+		List<String> failingList = (failing != null) ? Arrays.asList(failing.split(File.pathSeparator)) : new ArrayList<>();
 		String method = this.getClass().getSimpleName();
 
 		projectFacade = getProjectConfiguration(location, projectName, method, failingList, dependencies, true);
@@ -65,8 +65,8 @@ public class AstorMain extends AbstractMain {
 
 	/**
 	 * It creates a repair engine according to an execution mode.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param removeMode
 	 * @return
 	 * @throws Exception
@@ -96,6 +96,9 @@ public class AstorMain extends AbstractMain {
 
 		} else if (ExecutionMode.SCAFFOLD.equals(mode)) {
 			astorCore = new ScaffoldRepairEngine(mutSupporter, projectFacade);
+
+		} else if (ExecutionMode.Leven.equals(mode)) {
+			astorCore = new LevenshteinApproach(mutSupporter, projectFacade);
 
 		} else {
 			// If the execution mode is any of the predefined, Astor
@@ -133,7 +136,7 @@ public class AstorMain extends AbstractMain {
 
 	/**
 	 * We create an instance of the Engine which name is passed as argument.
-	 * 
+	 *
 	 * @param customEngineValue
 	 * @param mutSupporter
 	 * @param projectFacade
@@ -183,8 +186,8 @@ public class AstorMain extends AbstractMain {
 			}
 
 			if (astorCore == null) {
-				System.err.println("Unknown mode of execution: '" + mode + "',  modes are: "
-						+ Arrays.toString(ExecutionMode.values()));
+				System.err.println(
+						"Unknown mode of execution: '" + mode + "',  modes are: " + Arrays.toString(ExecutionMode.values()));
 				return;
 			}
 

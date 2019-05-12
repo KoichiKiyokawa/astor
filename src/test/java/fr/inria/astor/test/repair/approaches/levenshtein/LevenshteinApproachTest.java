@@ -2,6 +2,7 @@ package fr.inria.astor.test.repair.approaches.levenshtein;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.martiansoftware.jsap.JSAPException;
 
@@ -15,10 +16,10 @@ public class LevenshteinApproachTest {
   public void testGetIngredientPool() {
     try {
       MutationSupporter mutSupporter = new MutationSupporter();
-      ProjectRepairFacade projFacade;
-      projFacade = new ProjectRepairFacade(new ProjectConfiguration());
+      ProjectRepairFacade projFacade = new ProjectRepairFacade(new ProjectConfiguration());
       LevenshteinApproach leven = new LevenshteinApproach(mutSupporter, projFacade);
-      System.out.println(leven.getIngredientPool());
+      assertNull(leven.getIngredientPool());
+      assertEquals("fr.inria.astor.approaches.levenshtein.LevenshteinApproach", LevenshteinApproach.class.getCanonicalName());
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -210,6 +210,14 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 
 	}
 
+	/**
+	 * ここで、IngredientSearchStrategyを振り分けている
+	 * オーバーライドしてしまえば良いかも
+	 *
+	 * @param ingredientspace
+	 * @return
+	 * @throws Exception
+	 */
 	public static IngredientSearchStrategy retrieveIngredientSearchStrategy(IngredientPool ingredientspace)
 			throws Exception {
 		IngredientSearchStrategy ingStrategy = null;

@@ -25,13 +25,15 @@ import spoon.reflect.declaration.CtType;
 /**
  * Strategy based on {@link UniformRandomIngredientSearch}, which stores the
  * ingredient already used by the algorithm.
- * 
+ *
+ * 拡張の参考にしたい
+ *
  * @author Matias Martinez
  *
  */
 public class RandomSelectionTransformedIngredientStrategy extends IngredientSearchStrategy {
 
-	IngredientTransformationStrategy ingredientTransformationStrategy;
+	IngredientTransformationStrategy ingredientTransformationStrategy; // ingredientの変換方法
 
 	protected Logger log = Logger.getLogger(this.getClass().getName());
 
@@ -57,11 +59,11 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 	/**
 	 * Return an ingredient. As it has a cache, it never returns twice the same
 	 * ingredient.
-	 * 
+	 *
 	 * @param modificationPoint
-	 * @param targetStmt
+	 * @param targetStmt           <- 使われてない？
 	 * @param operationType
-	 * @param elementsFromFixSpace
+	 * @param elementsFromFixSpace <- 引数として受け取ってない(がローカル変数として使われている)
 	 * @return
 	 */
 	@Override
@@ -69,6 +71,7 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 
 		int attemptsBaseIngredients = 0;
 
+		// elementをとってくる
 		List<Ingredient> baseElements = getNotExhaustedBaseElements(modificationPoint, operationType);
 
 		if (baseElements == null || baseElements.isEmpty()) {
@@ -85,10 +88,10 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 		Stats.currentStat.getIngredientsStats().addSize(Stats.currentStat.getIngredientsStats().ingredientSpaceSize,
 				baseElements.size());
 
+		// とってきたelementsに対して、
 		while (attemptsBaseIngredients < elementsFromFixSpace) {
 
-			log.debug(String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients,
-					elementsFromFixSpace));
+			log.debug(String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients, elementsFromFixSpace));
 
 			Ingredient baseIngredient = getRandomStatementFromSpace(baseElements);
 
@@ -97,8 +100,7 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 				return null;
 			}
 
-			Ingredient refinedIngredient = getNotUsedTransformedElement(modificationPoint, operationType,
-					baseIngredient);
+			Ingredient refinedIngredient = getNotUsedTransformedElement(modificationPoint, operationType, baseIngredient);
 
 			attemptsBaseIngredients++;
 
@@ -111,12 +113,19 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 		} // End while
 
 		log.debug("--- no mutation left to apply in element "
-				+ StringUtil.trunc(modificationPoint.getCodeElement().getShortRepresentation())
-				+ ", search space size: " + elementsFromFixSpace);
+				+ StringUtil.trunc(modificationPoint.getCodeElement().getShortRepresentation()) + ", search space size: "
+				+ elementsFromFixSpace);
 		return null;
 
 	}
 
+	/**
+	 *
+	 * @param modificationPoint
+	 * @param operator
+	 * @param baseIngredient
+	 * @return
+	 */
 	public List<Ingredient> getInstancesFromBase(ModificationPoint modificationPoint, AstorOperator operator,
 			Ingredient baseIngredient) {
 		List<Ingredient> ingredientsAfterTransformation = null;
@@ -129,8 +138,8 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 			// We try two cases: null (template cannot be instantiated) or
 			// empty (all combination were already tested)
 			if (ingredientsAfterTransformation == null) {
-				log.debug("Already instantiated template but without valid instance on this MP, update stats "
-						+ baseIngredient);
+				log.debug(
+						"Already instantiated template but without valid instance on this MP, update stats " + baseIngredient);
 				return null;
 			} else if (ingredientsAfterTransformation.isEmpty()) {
 				log.debug("All instances were already tried, exit without update stats."
@@ -139,15 +148,13 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 			} else {
 				// We have still ingredients to apply
 				Stats.currentStat.getIngredientsStats().addSize(
-						Stats.currentStat.getIngredientsStats().combinationByIngredientSize,
-						ingredientsAfterTransformation.size());
+						Stats.currentStat.getIngredientsStats().combinationByIngredientSize, ingredientsAfterTransformation.size());
 			}
 
 		} else {
 			log.debug("Calculating transformations");
 			try {
-				ingredientsAfterTransformation = ingredientTransformationStrategy.transform(modificationPoint,
-						baseIngredient);
+				ingredientsAfterTransformation = ingredientTransformationStrategy.transform(modificationPoint, baseIngredient); // 実際に変換する
 				if (ingredientsAfterTransformation != null && !ingredientsAfterTransformation.isEmpty()) {
 					appliedIngredientsCache.put(keyBaseIngredient, ingredientsAfterTransformation);
 					Stats.currentStat.getIngredientsStats().addSize(
@@ -155,9 +162,8 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 							ingredientsAfterTransformation.size());
 
 				} else {
-					log.debug(
-							"The transformation strategy has not returned any Valid transformed ingredient for ingredient base "
-									+ StringUtil.trunc(baseIngredient.getCode()));
+					log.debug("The transformation strategy has not returned any Valid transformed ingredient for ingredient base "
+							+ StringUtil.trunc(baseIngredient.getCode()));
 
 					appliedIngredientsCache.put(keyBaseIngredient, null);
 					Stats.currentStat.getIngredientsStats()
@@ -171,10 +177,17 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 		return ingredientsAfterTransformation;
 	}
 
+	/**
+	 * 変換済みで、かつまだ使われていない要素をとってくる
+	 *
+	 * @param modificationPoint
+	 * @param operator
+	 * @param baseIngredient
+	 * @return
+	 */
 	public Ingredient getNotUsedTransformedElement(ModificationPoint modificationPoint, AstorOperator operator,
 			Ingredient baseIngredient) {
-		List<Ingredient> ingredientsAfterTransformation = getInstancesFromBase(modificationPoint, operator,
-				baseIngredient);
+		List<Ingredient> ingredientsAfterTransformation = getInstancesFromBase(modificationPoint, operator, baseIngredient); // 変換後のingredient
 		if (ingredientsAfterTransformation == null) {
 			return null;
 		}
@@ -185,7 +198,7 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 
 	/**
 	 * Returns randomly an ingredient
-	 * 
+	 *
 	 * @param modificationPoint
 	 * @param operator
 	 * @param baseIngredient
@@ -264,7 +277,7 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 	/**
 	 * Return the number of ingredients according to: the location and the operator
 	 * to apply.
-	 * 
+	 *
 	 * @param modificationPoint
 	 * @param operationType
 	 * @return
@@ -299,7 +312,7 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 
 	/**
 	 * Check if the ingredient was already used
-	 * 
+	 *
 	 * @param id       program instance id.
 	 * @param fix
 	 * @param location
@@ -320,8 +333,7 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 			prev = new ArrayList<String>();
 			prev.add(fix);
 			appliedCache.put(lockey, prev);
-			log.debug(
-					"\nChache: New Element with new Key: " + StringUtil.trunc(fix) + " in " + StringUtil.trunc(lockey));
+			log.debug("\nChache: New Element with new Key: " + StringUtil.trunc(fix) + " in " + StringUtil.trunc(lockey));
 			return false;
 		} else {
 			// The element has mutation applied
@@ -330,8 +342,8 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 				return true;
 			} else {
 				prev.add(fix);
-				log.debug("\nChache: New Element with existing Key: " + StringUtil.trunc(fix) + " in "
-						+ StringUtil.trunc(lockey));
+				log.debug(
+						"\nChache: New Element with existing Key: " + StringUtil.trunc(fix) + " in " + StringUtil.trunc(lockey));
 				return false;
 			}
 		}
@@ -352,7 +364,8 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 	}
 
 	/**
-	 * 
+	 * 指定されたingredientのスペースからランダムにingredientをかえす
+	 *
 	 * @param fixSpace
 	 * @return
 	 */

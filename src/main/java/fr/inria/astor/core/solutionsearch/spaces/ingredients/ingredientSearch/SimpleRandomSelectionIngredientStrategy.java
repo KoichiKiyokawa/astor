@@ -19,7 +19,7 @@ import fr.inria.astor.util.StringUtil;
 /**
  * Strategy based on {@link UniformRandomIngredientSearch}, which stores the
  * ingredient already used by the algorithm.
- * 
+ *
  * @author Matias Martinez
  *
  */
@@ -39,8 +39,8 @@ public class SimpleRandomSelectionIngredientStrategy extends IngredientSearchStr
 
 	/**
 	 * Return an ingredient. As it has a cache, it never returns twice the same
-	 * ingredient.
-	 * 
+	 * ingredient. 主にここを拡張すればよいハズ
+	 *
 	 * @param modificationPoint
 	 * @param targetStmt
 	 * @param operationType
@@ -52,7 +52,7 @@ public class SimpleRandomSelectionIngredientStrategy extends IngredientSearchStr
 
 		int attemptsBaseIngredients = 0;
 
-		List<Ingredient> baseElements = geIngredientsFromSpace(modificationPoint, operationType);
+		List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
 
 		if (baseElements == null || baseElements.isEmpty()) {
 			log.debug("Any element available for mp " + modificationPoint);
@@ -68,8 +68,7 @@ public class SimpleRandomSelectionIngredientStrategy extends IngredientSearchStr
 		while (attemptsBaseIngredients < elementsFromFixSpace) {
 
 			attemptsBaseIngredients++;
-			log.debug(String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients,
-					elementsFromFixSpace));
+			log.debug(String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients, elementsFromFixSpace));
 
 			Ingredient baseIngredient = getRandomStatementFromSpace(baseElements);
 
@@ -89,8 +88,8 @@ public class SimpleRandomSelectionIngredientStrategy extends IngredientSearchStr
 		} // End while
 
 		log.debug("--- no mutation left to apply in element "
-				+ StringUtil.trunc(modificationPoint.getCodeElement().getShortRepresentation())
-				+ ", search space size: " + elementsFromFixSpace);
+				+ StringUtil.trunc(modificationPoint.getCodeElement().getShortRepresentation()) + ", search space size: "
+				+ elementsFromFixSpace);
 		return null;
 
 	}
@@ -102,7 +101,7 @@ public class SimpleRandomSelectionIngredientStrategy extends IngredientSearchStr
 	}
 
 	/**
-	 * 
+	 *
 	 * @param fixSpace
 	 * @return
 	 */
@@ -115,7 +114,10 @@ public class SimpleRandomSelectionIngredientStrategy extends IngredientSearchStr
 
 	}
 
-	public List<Ingredient> geIngredientsFromSpace(ModificationPoint modificationPoint, AstorOperator operationType) {
+	/**
+	 * ingredientのリストを探索範囲からとってくる
+	 */
+	public List<Ingredient> getIngredientsFromSpace(ModificationPoint modificationPoint, AstorOperator operationType) {
 
 		String type = null;
 		if (operationType instanceof ReplaceOp) {

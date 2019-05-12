@@ -10,6 +10,7 @@ import java.util.List;
  *
  */
 public enum ExecutionMode {
+	Leven(Collections.singletonList("leven")),
 	DeepRepair(Collections.singletonList("deeprepair")),
 	CARDUMEN(Collections.singletonList("cardumen")),
 	jGenProg(Collections.singletonList("jgenprog")),
