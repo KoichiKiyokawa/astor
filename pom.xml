@@ -107,6 +107,23 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<dependency>
+      <artifactId>lucene-core</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <version>[7.1.0,)</version>
+    </dependency>
+    <dependency>
+        <artifactId>lucene-analyzers</artifactId>
+        <groupId>org.apache.lucene</groupId>
+        <version>3.6.1</version>
+    </dependency>
+    <dependency>
+        <artifactId>lucene-spellchecker</artifactId>
+        <groupId>org.apache.lucene</groupId>
+        <version>3.6.1</version>
+    </dependency>
+
+
 	</dependencies>
 
 	<repositories>

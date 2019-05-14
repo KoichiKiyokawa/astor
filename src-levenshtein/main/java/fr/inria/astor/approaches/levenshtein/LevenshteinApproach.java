@@ -22,12 +22,9 @@ public class LevenshteinApproach extends JGenProg {
   @SuppressWarnings("rawtypes")
   @Override
   protected void loadIngredientSearchStrategy() throws Exception {
-
     IngredientPool ingredientspace = this.getIngredientPool();
-
+    // TODO: ここで変数の正規化しても良い？
     IngredientSearchStrategy ingStrategy = new LevenSearchStrategy(ingredientspace);
-
     this.setIngredientSearchStrategy(ingStrategy);
-
   }
 }

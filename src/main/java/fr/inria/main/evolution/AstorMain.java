@@ -209,6 +209,8 @@ public class AstorMain extends AbstractMain {
 	 * @throws ParseException
 	 */
 	public static void main(String[] args) throws Exception {
+		// args = "-mode jgenprog -srcjavafolder /src/java/ -srctestfolder /src/test/ -binjavafolder /target/classes/ -bintestfolder /target/test-classes/ -location /Users/koichi/jgenprog/astor/examples/Math-issue-280/ -dependencies examples/Math-issue-280/lib"
+		// 		.split(" ");
 		AstorMain m = new AstorMain();
 		m.execute(args);
 	}

@@ -1,6 +1,8 @@
 package fr.inria.astor.approaches.levenshtein;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Comparator;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.core.entities.Ingredient;
@@ -13,6 +15,8 @@ import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.approaches.jgenprog.operators.ReplaceOp;
 import fr.inria.astor.util.MapList;
 import fr.inria.astor.util.StringUtil;
+
+import org.apache.lucene.search.spell.LevensteinDistance;
 
 public class LevenSearchStrategy extends IngredientSearchStrategy {
   private static final Boolean DESACTIVATE_CACHE = ConfigurationProperties
@@ -31,6 +35,22 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
     List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
 
+    /**
+     * baseElementsをレーベンシュタイン距離に基づいて並び替える
+     */
+    // start sort
+    LevensteinDistance lDis = new LevensteinDistance();
+    log.debug(modificationPoint.getCodeElement());
+    String modifCode = modificationPoint.getCodeElement().toString();
+    Collections.sort(baseElements, new Comparator<Ingredient>() {
+      @Override
+      public int compare(Ingredient ingredientA, Ingredient ingredientB) {
+        return Float.compare(lDis.getDistance(ingredientA.getCode().toString(), modifCode),
+            lDis.getDistance(ingredientB.getCode().toString(), modifCode));
+      }
+    });
+    // end sort
+
     if (baseElements == null || baseElements.isEmpty()) {
       log.debug("Any element available for mp " + modificationPoint);
       return null;
@@ -48,7 +68,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       log.debug(
           String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients, elementsFromFixSpaceCount));
 
-      Ingredient baseIngredient = getStatementFromSpace(baseElements, modificationPoint);
+      Ingredient baseIngredient = baseElements.get(attemptsBaseIngredients);
 
       String newingredientkey = getKey(modificationPoint, operationType);
 
@@ -78,15 +98,21 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   }
 
   /**
-   * ランダムではなく、レーベンシュタイン距離に基づいて返す
+   * ランダムではなく、レーベンシュタイン距離に基づいて返す fixSpaceを並び替える
    *
    * @param fixSpace
    * @return
    */
-  protected Ingredient getStatementFromSpace(List<Ingredient> fixSpace, ModificationPoint modificationPoint) {
-    log.debug(modificationPoint.getCodeElement());
-    return null;
-  }
+  // protected Ingredient getStatementFromSpace(List<Ingredient> fixSpace,
+  // ModificationPoint modificationPoint) {
+  // LevensteinDistance lDis = new LevensteinDistance();
+  // log.debug(modificationPoint.getCodeElement());
+  // String modifCode = modificationPoint.getCodeElement().toString();
+  // fixSpace.stream().sorted((ingredientA, ingredientB) ->
+  // lDis.getDistance(ingredientA.getCode().toString, modifCode)
+  // - lDis.getDistance(ingredientB.getCode().toString, modifCode));
+  // return null;
+  // }
 
   /**
    * ingredientのリストを探索範囲からとってくる
