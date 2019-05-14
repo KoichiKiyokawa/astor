@@ -40,7 +40,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
      */
     // start sort
     LevensteinDistance lDis = new LevensteinDistance();
-    log.debug(modificationPoint.getCodeElement());
+    log.debug("modification point" + modificationPoint.getCodeElement());
     String modifCode = modificationPoint.getCodeElement().toString();
     Collections.sort(baseElements, new Comparator<Ingredient>() {
       @Override
