@@ -64,11 +64,11 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
     while (attemptsBaseIngredients < elementsFromFixSpaceCount) {
 
-      attemptsBaseIngredients++;
       log.debug(
           String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients, elementsFromFixSpaceCount));
 
       Ingredient baseIngredient = baseElements.get(attemptsBaseIngredients);
+      attemptsBaseIngredients++;
 
       String newingredientkey = getKey(modificationPoint, operationType);
 
