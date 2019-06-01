@@ -42,6 +42,7 @@ git log --oneline -n 1 --format=%B eb5b11a25c
 ## ここのソースコード見ると参考になりそう
 
 `src/main/java/fr/inria/astor/core/solutionsearch/spaces/ingredients/scopes/ctscopes`
+`ProjectFacade` 修正対象のソースコードをコピーしてくる処理が書かれている。コピー後に変数名の正規化を行えばよい？
 
 ## 発見
 
