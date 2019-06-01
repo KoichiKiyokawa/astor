@@ -39,6 +39,10 @@ git log --oneline -n 1 --format=%B eb5b11a25c
 
 - ingredient を並び替える処理を拡張して、変数名の正規化&レーベンシュタイン距離の測定で並び替える
 
+## ここのソースコード見ると参考になりそう
+
+`src/main/java/fr/inria/astor/core/solutionsearch/spaces/ingredients/scopes/ctscopes`
+
 ## 発見
 
 ingredient を何も返さない(`return null;`)実装にしても、削除のみで自動修正が行えてしまうことがある。

@@ -185,6 +185,7 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 			throws JSAPException, Exception {
 		String scope = ConfigurationProperties.properties.getProperty("scope");
 		IngredientPool ingredientspace = null;
+		// 探索するスコープの設定（グローバル | 同じパッケージ内 | 同じファイル内）に応じてingredintSpaceを返す
 		if ("global".equals(scope)) {
 			ingredientspace = (new GlobalBasicIngredientSpace(ingredientProcessors));
 		} else if ("package".equals(scope)) {
