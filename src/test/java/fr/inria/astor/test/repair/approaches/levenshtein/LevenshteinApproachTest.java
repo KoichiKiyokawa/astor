@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Ignore;
 import java.io.File;
+import java.io.IOException;
 
 import com.martiansoftware.jsap.JSAPException;
 
@@ -13,6 +14,8 @@ import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.main.CommandSummary;
 import fr.inria.main.evolution.AstorMain;
 import fr.inria.astor.core.setup.ProjectConfiguration;
+
+import fr.inria.astor.approaches.levenshtein.LevenFacade;
 
 public class LevenshteinApproachTest {
   @Test
@@ -46,5 +49,20 @@ public class LevenshteinApproachTest {
 
     main.execute(cs.flat());
     assertTrue(main.getEngine() instanceof LevenshteinApproach);
+  }
+
+  @Test
+  public void testNormalize() {
+    ProjectConfiguration properties = new ProjectConfiguration();
+    // TODO: 対象のディレクトリとかをセットしなきゃだめ
+
+    try {
+      LevenFacade lFacade = new LevenFacade(properties);
+      String pathOriginalCode = "examples/math_70/src/main/java/org/apache/commons/math/DimensionMismatchException.java";
+      String currentMutatorIdentifier = "default";
+      lFacade.copyOriginalSourceCode(pathOriginalCode, currentMutatorIdentifier);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
