@@ -16,7 +16,8 @@ public class LevenFacade extends ProjectRepairFacade {
 
   @Override
   public void copyOriginalSourceCode(String pathOriginalCode, String currentMutatorIdentifier) throws IOException {
-    File destination = new File(getProperties().getWorkingDirForSource() + File.separator + currentMutatorIdentifier);
+    // File destination = new File(getProperties().getWorkingDirForSource() + File.separator + currentMutatorIdentifier);
+    File destination = new File("./spooned/");
     destination.mkdirs();
     // FileUtils.copyDirectory(new File(pathOriginalCode), destination);
     // コピーする代わりに、変数名を正規化してから出力
