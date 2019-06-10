@@ -32,7 +32,7 @@ public class LevenshteinApproach extends JGenProg {
   protected void loadIngredientSearchStrategy() throws Exception {
     IngredientPool ingredientspace = this.getIngredientPool();
     // TODO: ここで変数の正規化しても良い？
-    IngredientSearchStrategy ingStrategy = new LevenSearchStrategy(ingredientspace);
+    LevenSearchStrategy ingStrategy = new LevenSearchStrategy(ingredientspace);
     this.setIngredientSearchStrategy(ingStrategy);
   }
 
