@@ -11,9 +11,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 /**
- * 
+ *
  * @author Matias Martinez, matias.martinez@inria.fr
- * 
+ *
  */
 public class ProjectRepairFacade {
 
@@ -29,7 +29,7 @@ public class ProjectRepairFacade {
 
 	/**
 	 * Set up a project for a given mutator identifier.
-	 * 
+	 *
 	 * @param currentMutatorIdentifier
 	 * @throws IOException
 	 */
@@ -62,20 +62,20 @@ public class ProjectRepairFacade {
 	/**
 	 * Copy the original code -from the path passed by parameter- to the mutation
 	 * folder
-	 * 
+	 *
 	 * @param pathOriginalCode
 	 * @throws IOException
 	 */
 	public void copyOriginalSourceCode(String pathOriginalCode, String currentMutatorIdentifier) throws IOException {
-		File destination = new File(
-				getProperties().getWorkingDirForSource() + File.separator + currentMutatorIdentifier);
+		File destination = new File(getProperties().getWorkingDirForSource() + File.separator + currentMutatorIdentifier);
 		destination.mkdirs();
 		FileUtils.copyDirectory(new File(pathOriginalCode), destination);
+		// TODO: ここで変数名の正規化を行えば良い
 	}
 
 	/**
 	 * Remove dir for a given mutation
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	public void cleanMutationResultDirectories(String currentMutatorIdentifier) throws IOException {
@@ -149,7 +149,7 @@ public class ProjectRepairFacade {
 
 	/**
 	 * Return classpath form mutated variant.
-	 * 
+	 *
 	 * @param currentMutatorIdentifier
 	 * @return
 	 * @throws MalformedURLException
