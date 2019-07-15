@@ -5,11 +5,16 @@ import java.io.IOException;
 
 import fr.inria.astor.core.setup.ProjectConfiguration;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
+
+import org.apache.log4j.Logger;
+
 import spoon.Launcher;
 
 import fr.inria.astor.approaches.levenshtein.NormalizeProcessor;
 
 public class LevenFacade extends ProjectRepairFacade {
+  protected Logger log = Logger.getLogger(this.getClass().getName());
+
   public LevenFacade(ProjectConfiguration properties) throws Exception {
     super(properties);
   }
@@ -25,6 +30,10 @@ public class LevenFacade extends ProjectRepairFacade {
     launcher.addInputResource(pathOriginalCode);
     launcher.addProcessor(new NormalizeProcessor());
     launcher.setSourceOutputDirectory(destination);
+    long startTime = System.currentTimeMillis();
+    log.info("--- Start Normalization ---");
     launcher.run();
+    long endTime = System.currentTimeMillis();
+    log.info("--- End Normalization. Time of normalize: " + (endTime - startTime) / 1000 + "(s) ---");
   }
 }
