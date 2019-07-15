@@ -55,6 +55,7 @@ public class AstorMain extends AbstractMain {
 
 		projectFacade.getProperties().setExperimentName(this.getClass().getSimpleName());
 
+		// 修正対象のソースコードをコピーしてくる処理など
 		projectFacade.setupWorkingDirectories(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
 
 		if (ConfigurationProperties.getPropertyBool("autocompile")) {

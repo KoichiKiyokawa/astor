@@ -31,12 +31,10 @@ public class LevenshteinApproach extends JGenProg {
   @Override
   protected void loadIngredientSearchStrategy() throws Exception {
     IngredientPool ingredientspace = this.getIngredientPool();
-    // TODO: ここで変数の正規化しても良い？
     LevenSearchStrategy ingStrategy = new LevenSearchStrategy(ingredientspace);
     this.setIngredientSearchStrategy(ingStrategy);
   }
 
-  // TODO: ここいじっても、変数名の正規化できそう？
   public static IngredientPool getIngredientPool(List<TargetElementProcessor<?>> ingredientProcessors)
       throws JSAPException, Exception {
     String scope = ConfigurationProperties.properties.getProperty("scope");
@@ -57,7 +55,6 @@ public class LevenshteinApproach extends JGenProg {
 
   @Override
   protected void loadIngredientPool() throws JSAPException, Exception {
-    // TODO: ここを拡張して、変数名の正規化を実装
     List<TargetElementProcessor<?>> ingredientProcessors = this.getTargetElementProcessors();
     // 探索するスコープの設定（グローバル | 同じパッケージ内 | 同じファイル内）に応じてingredintSpaceを返す
     IngredientPool ingredientspace = LevenshteinApproach.getIngredientPool(ingredientProcessors);

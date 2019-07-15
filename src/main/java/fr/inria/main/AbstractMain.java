@@ -16,6 +16,7 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import fr.inria.astor.approaches.levenshtein.LevenFacade;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.output.ReportResults;
 import fr.inria.astor.core.setup.ConfigurationProperties;
@@ -35,6 +36,7 @@ import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSelectionStra
 import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSpace;
 import fr.inria.astor.core.validation.ProgramVariantValidator;
 import fr.inria.astor.util.TimeUtil;
+import fr.inria.main.ExecutionMode;
 import fr.inria.main.evolution.ExtensionPoints;
 import spoon.Launcher;
 import spoon.OutputType;
@@ -43,9 +45,9 @@ import spoon.SpoonModelBuilder.InputType;
 /**
  * Abstract entry point of the framework. It defines and manages program
  * arguments.
- * 
+ *
  * @author Matias Martinez
- * 
+ *
  */
 public abstract class AbstractMain {
 
@@ -652,7 +654,7 @@ public abstract class AbstractMain {
 
 	/**
 	 * Finds an example to test in the command line
-	 * 
+	 *
 	 * @param cmd
 	 * @return
 	 * @throws Exception
@@ -727,7 +729,7 @@ public abstract class AbstractMain {
 
 	/**
 	 * Compile the original code
-	 * 
+	 *
 	 * @param properties
 	 */
 	protected void compileProject(ProjectConfiguration properties) {
@@ -807,9 +809,15 @@ public abstract class AbstractMain {
 
 		properties.setDataFolder(ConfigurationProperties.getProperty("resourcesfolder"));
 
-		ProjectRepairFacade ce = new ProjectRepairFacade(properties);
-
-		return ce;
+		// LevenFacadeを無理やり発動させる
+		if (ConfigurationProperties.getProperty("mode").toLowerCase().equals("leven")) {
+			log.info("Use LevenFacade");
+			LevenFacade lFacade = new LevenFacade(properties);
+			return lFacade;
+		} else {
+			ProjectRepairFacade ce = new ProjectRepairFacade(properties);
+			return ce;
+		}
 	}
 
 	private List<String> determineBinFolder(String originalProjectRoot, String paramBinFolder) {
