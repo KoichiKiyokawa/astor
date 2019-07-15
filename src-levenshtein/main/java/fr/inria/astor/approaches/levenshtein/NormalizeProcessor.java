@@ -13,11 +13,9 @@ public class NormalizeProcessor extends AbstractProcessor<CtElement> {
   public void process(CtElement elem) {
     if (elem instanceof CtLocalVariable) {
       CtLocalVariable localVar = (CtLocalVariable) elem;
-      System.out.println(localVar.getSimpleName());
       Refactoring.changeLocalVariableName(localVar, "$" + this.localVarIndex++);
     } else if (elem instanceof CtMethod) {
       CtMethod method = (CtMethod) elem;
-      System.out.println(method.getSimpleName());
       Refactoring.changeMethodName(method, "_" + this.methodIndex++);
     }
   }
