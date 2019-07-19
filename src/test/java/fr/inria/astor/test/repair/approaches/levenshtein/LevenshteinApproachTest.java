@@ -14,6 +14,7 @@ import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.main.CommandSummary;
 import fr.inria.main.evolution.AstorMain;
 import fr.inria.astor.core.setup.ProjectConfiguration;
+import fr.inria.astor.core.setup.ProjectPropertiesEnum;
 
 import fr.inria.astor.approaches.levenshtein.LevenFacade;
 
@@ -54,11 +55,13 @@ public class LevenshteinApproachTest {
   @Test
   public void testNormalize() {
     ProjectConfiguration properties = new ProjectConfiguration();
-    // TODO: 対象のディレクトリとかをセットしなきゃだめ
+    properties.setProperty(ProjectPropertiesEnum.workingDirSource, "./test_output/");
 
+    // TODO: 対象のディレクトリとかをセットしなきゃだめ
     try {
       LevenFacade lFacade = new LevenFacade(properties);
-      String pathOriginalCode = "examples/math_70/src/main/java/org/apache/commons/math/DimensionMismatchException.java";
+      // String pathOriginalCode = "examples/math_70/src/main/java/org/apache/commons/math/DimensionMismatchException.java";
+      String pathOriginalCode = "examples/math_70/src";
       String currentMutatorIdentifier = "default";
       lFacade.copyOriginalSourceCode(pathOriginalCode, currentMutatorIdentifier);
     } catch (Exception e) {

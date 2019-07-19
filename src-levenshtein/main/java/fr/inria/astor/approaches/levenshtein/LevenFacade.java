@@ -9,7 +9,6 @@ import fr.inria.astor.core.setup.ProjectRepairFacade;
 import org.apache.log4j.Logger;
 
 import spoon.Launcher;
-
 import fr.inria.astor.approaches.levenshtein.NormalizeProcessor;
 
 public class LevenFacade extends ProjectRepairFacade {
@@ -30,6 +29,7 @@ public class LevenFacade extends ProjectRepairFacade {
     launcher.addInputResource(pathOriginalCode);
     launcher.addProcessor(new NormalizeProcessor());
     launcher.setSourceOutputDirectory(destination);
+    launcher.getEnvironment().setAutoImports(true);
     long startTime = System.currentTimeMillis();
     log.info("--- Start Normalization ---");
     launcher.run();
