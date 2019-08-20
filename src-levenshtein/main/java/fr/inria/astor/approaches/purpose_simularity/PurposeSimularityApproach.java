@@ -10,9 +10,9 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 
 import fr.inria.astor.approaches.purpose_simularity.PurposeBasedSearchStrategy;
 
-public class PurposeSimulatiryApproach extends JGenProg {
+public class PurposeSimularityApproach extends JGenProg {
   // とりまコンストラクタはそのまま
-  public PurposeSimulatiryApproach(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade)
+  public PurposeSimularityApproach(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade)
       throws JSAPException {
     super(mutatorExecutor, projFacade);
   }
@@ -25,7 +25,8 @@ public class PurposeSimulatiryApproach extends JGenProg {
   protected void loadIngredientSearchStrategy() throws Exception {
     IngredientPool ingredientspace = this.getIngredientPool();
     // TODO: ここで変数の正規化しても良い？
-    IngredientSearchStrategy ingStrategy = new PurposeBasedSearchStrategy(ingredientspace, this.projectFacade.getOriginalProjectRootDir());
+    IngredientSearchStrategy ingStrategy = new PurposeBasedSearchStrategy(ingredientspace,
+        this.projectFacade.getOriginalProjectRootDir());
     this.setIngredientSearchStrategy(ingStrategy);
   }
 }

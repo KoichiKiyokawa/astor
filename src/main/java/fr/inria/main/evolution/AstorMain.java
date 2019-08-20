@@ -21,6 +21,8 @@ import fr.inria.astor.approaches.jkali.JKaliEngine;
 import fr.inria.astor.approaches.jmutrepair.MutationalExhaustiveRepair;
 import fr.inria.astor.approaches.scaffold.ScaffoldRepairEngine;
 import fr.inria.astor.approaches.levenshtein.LevenshteinApproach;
+import fr.inria.astor.approaches.purpose_simularity.PurposeSimularityApproach;
+import fr.inria.astor.approaches.purpose_simularity;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
 import fr.inria.astor.core.ingredientbased.ExhaustiveIngredientBasedEngine;
@@ -100,6 +102,9 @@ public class AstorMain extends AbstractMain {
 
 		} else if (ExecutionMode.Leven.equals(mode)) {
 			astorCore = new LevenshteinApproach(mutSupporter, projectFacade);
+
+		} else if (ExecutionMode.Purpose.equals(mode)) {
+			astorCore = new PurposeSimularityApproach(mutSupporter, projectFacade);
 
 		} else {
 			// If the execution mode is any of the predefined, Astor
@@ -210,8 +215,11 @@ public class AstorMain extends AbstractMain {
 	 * @throws ParseException
 	 */
 	public static void main(String[] args) throws Exception {
-		// args = "-mode jgenprog -srcjavafolder /src/java/ -srctestfolder /src/test/ -binjavafolder /target/classes/ -bintestfolder /target/test-classes/ -location /Users/koichi/jgenprog/astor/examples/Math-issue-280/ -dependencies examples/Math-issue-280/lib"
-		// 		.split(" ");
+		// args = "-mode jgenprog -srcjavafolder /src/java/ -srctestfolder /src/test/
+		// -binjavafolder /target/classes/ -bintestfolder /target/test-classes/
+		// -location /Users/koichi/jgenprog/astor/examples/Math-issue-280/ -dependencies
+		// examples/Math-issue-280/lib"
+		// .split(" ");
 		AstorMain m = new AstorMain();
 		m.execute(args);
 	}

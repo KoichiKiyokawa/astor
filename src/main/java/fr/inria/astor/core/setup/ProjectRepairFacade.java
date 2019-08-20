@@ -173,7 +173,7 @@ public class ProjectRepairFacade {
 		this.setUpProperties = properties;
 	}
 
-	// To be visited by PurposeSimulatiryApproach
+	// To be visited by PurposeSimularityApproach
 	public String getOriginalProjectRootDir() {
 		return this.setUpProperties.getOriginalProjectRootDir();
 	}
