@@ -112,17 +112,20 @@ public class ModificationPoint implements Comparable {
 	private void setCommitMessageByGitLogL(String originalProjectRootDir) {
 		int lineNumber = this.getCodeElement().getPosition().getSourceStart();
 		String[] args = String.format("git@log@-L@%d,%d:%s", lineNumber, lineNumber, getFilePath()).split("@");
-		CommandExecuter.run(args, originalProjectRootDir);
+		String res = CommandExecuter.run(args, originalProjectRootDir);
+		log.info("git result: " + res);
 	}
 
 	private void setCommitMessageByGitLogS(String originalProjectRootDir){
 		String codeStr = this.getCodeElement().toString();
 		String[] args = String.format("git@log@-S@'%s'", codeStr).split("@");
-		CommandExecuter.run(args, originalProjectRootDir);
+		String res = CommandExecuter.run(args, originalProjectRootDir);
+		log.info("git result: " + res);
 		// TODO: 結果をパースする
 	}
 
 	private String getFilePath() {
+		log.info("meta data: " + this.getCodeElement().getAllMetadata());
 		log.info("File Path: " + this.getCodeElement().getPath().toString());
 		return this.getCodeElement().getPath().toString();
 	}

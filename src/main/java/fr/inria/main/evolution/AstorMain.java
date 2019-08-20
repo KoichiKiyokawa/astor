@@ -103,6 +103,7 @@ public class AstorMain extends AbstractMain {
 			astorCore = new LevenshteinApproach(mutSupporter, projectFacade);
 
 		} else if (ExecutionMode.Purpose.equals(mode)) {
+			log.info("mode is Purpose");
 			astorCore = new PurposeSimularityApproach(mutSupporter, projectFacade);
 
 		} else {
