@@ -103,6 +103,10 @@ public class ModificationPoint implements Comparable {
 		return new ModificationPoint(identified, codeElement, ctClass, contextOfModificationPoint, this.generation);
 	}
 
+	private void setCommitMessage() {
+		setCommitMessageByGitLogL();
+	}
+
 	// by `git log -L`
 	private void setCommitMessageByGitLogL() {
 		int lineNumber = this.getCodeElement().getPosition().getSourceStart();
