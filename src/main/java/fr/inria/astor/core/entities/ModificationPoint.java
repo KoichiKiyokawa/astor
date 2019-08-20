@@ -7,6 +7,8 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 
+import org.apache.log4j.Logger;
+
 /**
  * ModificationPoint of the program variant. It represents an element (i.e.
  * spoon element, CtElement) of the program under analysis.
@@ -30,6 +32,7 @@ public class ModificationPoint implements Comparable {
 
 	/** Added */
 	public String commitMessage = "";
+	protected Logger log = Logger.getLogger(this.getClass().getName());
 
 	public ModificationPoint() {
 	}
