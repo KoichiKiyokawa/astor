@@ -22,7 +22,6 @@ import fr.inria.astor.approaches.jmutrepair.MutationalExhaustiveRepair;
 import fr.inria.astor.approaches.scaffold.ScaffoldRepairEngine;
 import fr.inria.astor.approaches.levenshtein.LevenshteinApproach;
 import fr.inria.astor.approaches.purpose_simularity.PurposeSimularityApproach;
-import fr.inria.astor.approaches.purpose_simularity;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
 import fr.inria.astor.core.ingredientbased.ExhaustiveIngredientBasedEngine;

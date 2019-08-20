@@ -6,6 +6,9 @@ import java.util.Map;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
 import spoon.reflect.declaration.CtElement;
 
+import fr.inria.astor.util.CommandExecuter;
+import org.apache.log4j.Logger;
+
 /**
  *
  * @author Matias Martinez matias.martinez@inria.fr
@@ -20,6 +23,9 @@ public class Ingredient {
 	protected String cacheString = null;
 
 	protected Map<String, Object> metadata = new HashMap<>();
+
+	/** Added */
+	protected Logger log = Logger.getLogger(this.getClass().getName());
 
 	public Ingredient(CtElement code, IngredientPoolScope scope, CtElement derivedFrom) {
 		super();
@@ -116,14 +122,14 @@ public class Ingredient {
 		// TODO: 結果をパースする
 	}
 
-	public void setCommitMessageByGitLogL() {
-		int lineNumber = this.getCodeElement().getPosition().getSourceStart();
-		String[] args = String.format("git@log@-L@%d,%d,%s", line, line, getFilePath());
+	public void setCommitMessageByGitLogL(String originalProjectRootDir) {
+		int lineNumber = this.getCode().getPosition().getSourceStart();
+		String[] args = String.format("git@log@-L@%d,%d,%s", lineNumber, lineNumber, getFilePath());
 		CommandExecuter.run(args, originalProjectRootDir);
 	}
 
 	private String getFilePath() {
-		log.info("File Path: " + this.getCodeElement().getPath());
-		return this.getCodeElement().getPath();
+		log.info("File Path: " + this.getCode().getPath());
+		return this.getCode().getPath();
 	}
 }
