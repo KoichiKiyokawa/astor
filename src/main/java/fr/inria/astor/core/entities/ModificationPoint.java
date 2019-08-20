@@ -123,7 +123,7 @@ public class ModificationPoint implements Comparable {
 	}
 
 	private String getFilePath() {
-		log.info("File Path: " + this.getCodeElement().getPath());
-		return this.getCodeElement().getPath();
+		log.info("File Path: " + this.getCodeElement().getPath().toString());
+		return this.getCodeElement().getPath().toString();
 	}
 }
