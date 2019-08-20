@@ -7,13 +7,23 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStrategy;
 
 public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
-  public PurposeBasedSearchStrategy(IngredientPool space) {
-    super(space);
-  }
+	public String originalProjectRootDir = "./";
 
-  @Override
-  public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
-    // TODO: baseElementsをコミットメッセージに応じて並び替える
-    return null;
-  }
+	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir) {
+		super(space);
+		this.originalProjectRootDir = originalProjectRootDir;
+	}
+
+	@Override
+	public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
+		modificationPoint.setCommitMessage(this.originalProjectRootDir);
+
+		List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
+		for (Ingredient baseElem : baseElements) {
+			baseElem.setCommitMessageByGitLogS(this.originalProjectRootDir);
+		}
+		// TODO: baseElementsをコミットメッセージに応じて並び替える
+
+		return null;
+	}
 }

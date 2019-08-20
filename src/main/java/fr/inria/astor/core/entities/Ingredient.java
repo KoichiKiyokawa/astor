@@ -7,7 +7,7 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPo
 import spoon.reflect.declaration.CtElement;
 
 /**
- * 
+ *
  * @author Matias Martinez matias.martinez@inria.fr
  *
  */
@@ -70,7 +70,7 @@ public class Ingredient {
 
 	/**
 	 * Stores the value of code value. The first invocation it calculate it.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getChacheCodeString() {
@@ -109,4 +109,21 @@ public class Ingredient {
 		return metadata;
 	}
 
+	public void setCommitMessageByGitLogS(String originalProjectRootDir) {
+		String codeStr = this.toString();
+		String[] args = String.format("git@log@-S@'%s'", codeStr).split("@");
+		CommandExecuter.run(args, originalProjectRootDir);
+		// TODO: 結果をパースする
+	}
+
+	public void setCommitMessageByGitLogL() {
+		int lineNumber = this.getCodeElement().getPosition().getSourceStart();
+		String[] args = String.format("git@log@-L@%d,%d,%s", line, line, getFilePath());
+		CommandExecuter.run(args, originalProjectRootDir);
+	}
+
+	private String getFilePath() {
+		log.info("File Path: " + this.getCodeElement().getPath());
+		return this.getCodeElement().getPath();
+	}
 }

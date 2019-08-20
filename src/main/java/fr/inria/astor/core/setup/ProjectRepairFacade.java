@@ -173,4 +173,8 @@ public class ProjectRepairFacade {
 		this.setUpProperties = properties;
 	}
 
+	// To be visited by PurposeSimulatiryApproach
+	public String getOriginalProjectRootDir() {
+		return this.setUpProperties.getOriginalProjectRootDir();
+	}
 }

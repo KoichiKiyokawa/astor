@@ -2,6 +2,7 @@ package fr.inria.astor.core.entities;
 
 import java.util.List;
 
+import fr.inria.astor.util.CommandExecuter;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
@@ -9,9 +10,9 @@ import spoon.reflect.declaration.CtVariable;
 /**
  * ModificationPoint of the program variant. It represents an element (i.e.
  * spoon element, CtElement) of the program under analysis.
- * 
+ *
  * @author Matias Martinez, matias.martinez@inria.fr
- * 
+ *
  */
 public class ModificationPoint implements Comparable {
 
@@ -27,6 +28,9 @@ public class ModificationPoint implements Comparable {
 
 	protected int generation = -1;
 
+	/** Added */
+	public String commitMessage = "";
+
 	public ModificationPoint() {
 	}
 
@@ -38,6 +42,7 @@ public class ModificationPoint implements Comparable {
 		this.ctClass = ctClass;
 		this.contextOfModificationPoint = contextOfGen;
 		this.generation = generation;
+		this.setCommitMessage();
 	}
 
 	public ModificationPoint(CtElement rootElement, CtClass ctClass, List<CtVariable> contextOfGen) {
@@ -45,6 +50,7 @@ public class ModificationPoint implements Comparable {
 		this.codeElement = rootElement;
 		this.ctClass = ctClass;
 		this.contextOfModificationPoint = contextOfGen;
+		this.setCommitMessage();
 	}
 
 	public CtElement getCodeElement() {
@@ -97,4 +103,22 @@ public class ModificationPoint implements Comparable {
 		return new ModificationPoint(identified, codeElement, ctClass, contextOfModificationPoint, this.generation);
 	}
 
+	// by `git log -L`
+	private void setCommitMessageByGitLogL() {
+		int lineNumber = this.getCodeElement().getPosition().getSourceStart();
+		String[] args = String.format("git@log@-L@%d,%d,%s", line, line, getFilePath());
+		CommandExecuter.run(args, originalProjectRootDir);
+	}
+
+	private void setCommitMessageByGitLogS(String originalProjectRootDir){
+		String codeStr = this.getCodeElement().toString();
+		String[] args = String.format("git@log@-S@'%s'", codeStr).split("@");
+		CommandExecuter.run(args, originalProjectRootDir);
+		// TODO: 結果をパースする
+	}
+
+	private String getFilePath() {
+		log.info("File Path: " + this.getCodeElement().getPath());
+		return this.getCodeElement().getPath();
+	}
 }

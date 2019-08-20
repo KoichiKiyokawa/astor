@@ -18,14 +18,14 @@ public class PurposeSimulatiryApproach extends JGenProg {
   }
 
   /**
-   * 無理やりLevenSearchStrategyをセット
+   * 無理やりPurposeBasedSearchStrategyをセット
    */
   @SuppressWarnings("rawtypes")
   @Override
   protected void loadIngredientSearchStrategy() throws Exception {
     IngredientPool ingredientspace = this.getIngredientPool();
     // TODO: ここで変数の正規化しても良い？
-    IngredientSearchStrategy ingStrategy = new PurposeBasedSearchStrategy(ingredientspace);
+    IngredientSearchStrategy ingStrategy = new PurposeBasedSearchStrategy(ingredientspace, this.projectFacade.getOriginalProjectRootDir());
     this.setIngredientSearchStrategy(ingStrategy);
   }
 }
