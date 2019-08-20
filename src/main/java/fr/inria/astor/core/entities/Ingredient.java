@@ -124,7 +124,7 @@ public class Ingredient {
 
 	public void setCommitMessageByGitLogL(String originalProjectRootDir) {
 		int lineNumber = this.getCode().getPosition().getSourceStart();
-		String[] args = String.format("git@log@-L@%d,%d,%s", lineNumber, lineNumber, getFilePath());
+		String[] args = String.format("git@log@-L@%d,%d:%s", lineNumber, lineNumber, getFilePath()).split("@");
 		CommandExecuter.run(args, originalProjectRootDir);
 	}
 
