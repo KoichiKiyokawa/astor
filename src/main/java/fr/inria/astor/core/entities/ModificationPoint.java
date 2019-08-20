@@ -42,7 +42,6 @@ public class ModificationPoint implements Comparable {
 		this.ctClass = ctClass;
 		this.contextOfModificationPoint = contextOfGen;
 		this.generation = generation;
-		this.setCommitMessage();
 	}
 
 	public ModificationPoint(CtElement rootElement, CtClass ctClass, List<CtVariable> contextOfGen) {
@@ -50,7 +49,6 @@ public class ModificationPoint implements Comparable {
 		this.codeElement = rootElement;
 		this.ctClass = ctClass;
 		this.contextOfModificationPoint = contextOfGen;
-		this.setCommitMessage();
 	}
 
 	public CtElement getCodeElement() {
@@ -103,12 +101,12 @@ public class ModificationPoint implements Comparable {
 		return new ModificationPoint(identified, codeElement, ctClass, contextOfModificationPoint, this.generation);
 	}
 
-	private void setCommitMessage() {
-		setCommitMessageByGitLogL();
+	public void setCommitMessage(String originalProjectRootDir) {
+		setCommitMessageByGitLogL(originalProjectRootDir);
 	}
 
 	// by `git log -L`
-	private void setCommitMessageByGitLogL() {
+	private void setCommitMessageByGitLogL(String originalProjectRootDir) {
 		int lineNumber = this.getCodeElement().getPosition().getSourceStart();
 		String[] args = String.format("git@log@-L@%d,%d,%s", lineNumber, lineNumber, getFilePath());
 		CommandExecuter.run(args, originalProjectRootDir);
