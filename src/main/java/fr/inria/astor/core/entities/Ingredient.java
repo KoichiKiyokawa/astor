@@ -129,7 +129,7 @@ public class Ingredient {
 	}
 
 	private String getFilePath() {
-		log.info("File Path: " + this.getCode().getPath());
-		return this.getCode().getPath();
+		log.info("File Path: " + this.getCode().getPath().toString());
+		return this.getCode().getPath().toString();
 	}
 }

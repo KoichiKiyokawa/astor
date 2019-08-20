@@ -27,9 +27,9 @@ import spoon.reflect.declaration.CtVariable;
 
 /**
  * Creates the initial population of program variants
- * 
+ *
  * @author Matias Martinez, matias.martinez@inria.fr
- * 
+ *
  */
 public class ProgramVariantFactory {
 
@@ -59,7 +59,7 @@ public class ProgramVariantFactory {
 
 	/**
 	 * Create a list of Program Variant from a list of suspicious code.
-	 * 
+	 *
 	 * @param suspiciousList
 	 * @param maxNumberInstances
 	 * @param populationControler
@@ -104,7 +104,7 @@ public class ProgramVariantFactory {
 	/**
 	 * A Program instances is created from the list of suspicious. For each
 	 * suspiciuos a list of modif point is created.
-	 * 
+	 *
 	 * @param suspiciousList
 	 * @param idProgramInstance
 	 * @return
@@ -200,7 +200,7 @@ public class ProgramVariantFactory {
 	/**
 	 * It receives a suspicious code (a line) and it create a list of Gens from than
 	 * suspicious line when it's possible.
-	 * 
+	 *
 	 * @param suspiciousCode
 	 * @param progInstance
 	 * @return
@@ -264,7 +264,7 @@ public class ProgramVariantFactory {
 	/**
 	 * Retrieve the ct elements we want to consider in our model, for instance, some
 	 * approach are interested only in repair If conditions.
-	 * 
+	 *
 	 * @param ctSuspects
 	 * @param processors
 	 * @return
@@ -304,7 +304,7 @@ public class ProgramVariantFactory {
 	 * This method revolve a CtClass from one suspicious statement. If it was
 	 * resolved before, it get it from a "cache" of CtClasses stored in the Program
 	 * Instance.
-	 * 
+	 *
 	 * @param suspiciousCode
 	 * @param progInstance
 	 * @return
@@ -332,7 +332,7 @@ public class ProgramVariantFactory {
 
 	/**
 	 * New Program Variant Clone
-	 * 
+	 *
 	 * @param parentVariant
 	 * @param id
 	 * @return
@@ -358,7 +358,7 @@ public class ProgramVariantFactory {
 
 	/**
 	 * TODO: Replicated in RepairActionLoops
-	 * 
+	 *
 	 * @param candidate
 	 * @param ctclass
 	 * @return
