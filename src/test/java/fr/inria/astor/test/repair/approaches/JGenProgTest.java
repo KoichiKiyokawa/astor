@@ -21,6 +21,7 @@ import fr.inria.astor.core.entities.StatementOperatorInstance;
 import fr.inria.astor.core.entities.TestCaseVariantValidationResult;
 import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
 import fr.inria.astor.core.solutionsearch.population.PopulationConformation;
 import fr.inria.astor.test.repair.core.BaseEvolutionaryTest;
 import fr.inria.astor.test.repair.evaluation.regression.MathCommandsTests;
@@ -334,6 +335,51 @@ public class JGenProgTest extends BaseEvolutionaryTest {
 
 	@SuppressWarnings("rawtypes")
 	@Test
+	public void testMath5_buggy() throws Exception {
+		AstorMain main1 = new AstorMain();
+		File out = new File(ConfigurationProperties.getProperty("workingDirectory"));
+		String dep = new File("./examples/libs/junit-4.10.jar").getAbsolutePath();
+		String[] args = new String[] { "-mode", "jgenprog", "-location",
+				new File("./examples/math_5").getAbsolutePath(),
+				//
+				"-dependencies", dep,
+				//
+				"-flthreshold", "0.5", "-out", out.getAbsolutePath(),
+				//
+				//
+				"-scope", "local", "-seed", "0",
+				//
+				"-maxgen", "5000",
+				//
+				"-stopfirst", "true", "-maxtime", "200",
+				//
+				"-loglevel", "INFO",
+				//
+				"-stopfirst", "true",
+				//
+				"-srcjavafolder", "/src/main/java/",
+				//
+				"-srctestfolder", "/src/test/java/",
+				//
+				"-binjavafolder", "/target/classes",
+				//
+				"-bintestfolder", "/target/test-classes",
+				//
+				"-javacompliancelevel", "6",
+
+				"-parameters", "maxmodificationpoints:1"
+
+		};
+		System.out.println(Arrays.toString(args));
+		main1.execute(args);
+
+		List<ProgramVariant> solutions = main1.getEngine().getSolutions();
+		assertTrue(solutions.size() > 0);
+
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Test
 	public void testMath106UndoException() throws Exception {
 		AstorMain main1 = new AstorMain();
 		String dep = new File("./examples/libs/commons-discovery-0.2.jar").getAbsolutePath() + File.pathSeparator
@@ -391,6 +437,47 @@ public class JGenProgTest extends BaseEvolutionaryTest {
 
 		System.out.println(Arrays.toString(cs.flat()));
 		main1.execute(cs.flat());
+
+		List<ProgramVariant> solutions = main1.getEngine().getSolutions();
+		assertTrue(solutions.size() > 0);
+		assertEquals(1, solutions.size());
+		ProgramVariant variant = solutions.get(0);
+		assertFalse(variant.getPatchDiff().getFormattedDiff().isEmpty());
+		assertEquals(AstorOutputStatus.STOP_BY_PATCH_FOUND, main1.getEngine().getOutputStatus());
+
+		String diff = variant.getPatchDiff().getFormattedDiff();
+		log.debug("Patch: " + diff);
+
+	}
+
+	@Test
+	public void testMath70ChangeModifPoints() throws Exception {
+		AstorMain main1 = new AstorMain();
+
+		CommandSummary cs = MathCommandsTests.getMath70Command();
+		cs.command.put("-stopfirst", "true");
+		// by default, max generations is zero, that means, it does not evolve
+		cs.command.put("-maxgen", "0");
+		cs.command.put("-population", "1");
+
+		// We execute astor for creating the model and run FL
+		main1.execute(cs.flat());
+
+		// Let's change the number of generations (it was 0 in the original command)
+		ConfigurationProperties.setProperty("maxGeneration", "10000");
+		AstorCoreEngine engine = main1.getEngine();
+
+		assertEquals(1, engine.getVariants().size());
+		engine.getVariants().get(0).getModificationPoints()
+				.removeIf(e -> !(e.getCodeElement().toString().equals("return solve(min, max)")));
+
+		assertEquals(1, engine.getVariants().get(0).getModificationPoints().size());
+		// let's start the evolution again (the model was already created on that
+		// engine, so we directly call start)
+		engine.startEvolution();
+
+		// we should call end after the startevol
+		engine.atEnd();
 
 		List<ProgramVariant> solutions = main1.getEngine().getSolutions();
 		assertTrue(solutions.size() > 0);

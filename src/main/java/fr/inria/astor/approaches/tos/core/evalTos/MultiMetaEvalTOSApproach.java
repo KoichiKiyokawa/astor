@@ -1,6 +1,8 @@
 package fr.inria.astor.approaches.tos.core.evalTos;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -11,6 +13,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,20 +23,16 @@ import com.martiansoftware.jsap.JSAPException;
 import fr.inria.astor.approaches.tos.core.evalTos.ingredients.ClusterExpressions;
 import fr.inria.astor.approaches.tos.core.evalTos.ingredients.DynaIngredientPool;
 import fr.inria.astor.approaches.tos.operator.DynaIngredientOperator;
+import fr.inria.astor.approaches.tos.operator.metaevaltos.CompositeMethodXMethodReplacementOp;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.ConstReplacementOp;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.IOperatorWithTargetElement;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.LogicExpOperator;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.LogicRedOperator;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.MetaGenerator;
-import fr.inria.astor.approaches.tos.operator.metaevaltos.MethodXMethodReplacementArgumentRemoveOp;
-import fr.inria.astor.approaches.tos.operator.metaevaltos.MethodXMethodReplacementDiffArgumentsOp;
-import fr.inria.astor.approaches.tos.operator.metaevaltos.MethodXMethodReplacementDiffNameOp;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.MethodXVariableReplacementOp;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.OperatorReplacementOp;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.SupportOperators;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.UnwrapfromIfOp;
-import fr.inria.astor.approaches.tos.operator.metaevaltos.UnwrapfromMethodCallOp;
-import fr.inria.astor.approaches.tos.operator.metaevaltos.UnwrapfromTryOp;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.VarReplacementByAnotherVarOp;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.VarReplacementByMethodCallOp;
 import fr.inria.astor.approaches.tos.operator.metaevaltos.WrapwithIfNullCheck;
@@ -68,18 +68,76 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 
 	public static final String METID = "metid";
 	public static final String METALL = "metid";
-	public static int MAX_GENERATIONS = ConfigurationProperties.getPropertyInt("maxGeneration");
+	public static int MAX_GENERATIONS = 0;
 	public int modifPointsAnalyzed = 0;
 
 	public List<ProgramVariant> evaluatedProgramVariants = new ArrayList<>();
 
 	protected IPredictor predictor = null;
 
+	/**
+	 * Keeps the prediction obtained for each modification point
+	 */
 	public Map<ModificationPoint, PredictionResult> predictions = new HashMap();
+
+	/**
+	 * Stores the prediction with a solution
+	 */
+	MapList<IPrediction, ProgramVariant> predictedVariantWithSol = new MapList<>();
+
+	/**
+	 * keeps the relation between the meta and the concrete
+	 */
+	MapList<ProgramVariant, ProgramVariant> metaToConcrete = new MapList<>();
+
+	/**
+	 * Attempts
+	 * 
+	 * @param mutatorExecutor
+	 * @param projFacade
+	 * @throws JSAPException
+	 */
+	Map<IPrediction, Integer> attempts = new HashMap<>();
+
+	public static MapList<String, AstorOperator> operators = new MapList<>();
+
+	static {
+		// "addassignment"
+		operators.add("wrapsTryCatch", new WrapwithTrySingleStatementOp());
+		operators.add("wrapsIfElse_Others", new WrapwithIfOp());//
+		operators.add("wrapsIf_Others", new WrapwithIfOp());// duplicate
+		operators.add("wrapsIfElse_NULL", new WrapwithIfNullCheck());
+		operators.add("wrapsIf_NULL", new WrapwithIfNullCheck());// duplicate
+		//
+
+		// wrapsLoop
+		operators.add("VAR_RW_VAR", new VarReplacementByAnotherVarOp());
+		operators.add("expLogicExpand", new LogicExpOperator());
+
+		operators.add("Method_RW_Method", new CompositeMethodXMethodReplacementOp());
+
+//		operators.add("Method_RW_Method", new MethodXMethodReplacementDiffNameOp());// TODO
+//		operators.add("Method_RW_Method", new MethodXMethodReplacementDiffArgumentsOp());
+//		operators.add("Method_RW_Method", new MethodXMethodReplacementArgumentRemoveOp());
+//		operators.add("unwrapMethod", new UnwrapfromMethodCallOp());
+//		// ops.add("", new UnwrapfromTryOp());//ignored
+		operators.add("unwrapIfElse", new UnwrapfromIfOp());
+		operators.add("expLogicReduce", new LogicRedOperator());
+		operators.add("VAR_RW_Method", new VarReplacementByMethodCallOp());
+		operators.add("binOperatorModif", new OperatorReplacementOp());
+		operators.add("constChange", new ConstReplacementOp());
+
+		//
+		operators.add("wrapsMethod", null);// TODO
+		operators.add("Method_RW_Var", new MethodXVariableReplacementOp());// TODO
+		//
+
+	}
 
 	public MultiMetaEvalTOSApproach(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade)
 			throws JSAPException {
 		super(mutatorExecutor, projFacade);
+		MAX_GENERATIONS = ConfigurationProperties.getPropertyInt("maxGeneration");
 		this.operatorSpace = new OperatorSpace();
 		loadPredictor();
 	}
@@ -105,24 +163,15 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 
 	@Override
 	protected void loadOperatorSpaceDefinition() throws Exception {
-		this.operatorSpace = new OperatorSpace();
-		// TODO: add statement
-		this.operatorSpace.register(new WrapwithTrySingleStatementOp());
-		this.operatorSpace.register(new WrapwithIfOp());
-		this.operatorSpace.register(new WrapwithIfNullCheck());
-		this.operatorSpace.register(new VarReplacementByAnotherVarOp());
-		this.operatorSpace.register(new LogicExpOperator());
-		this.operatorSpace.register(new MethodXMethodReplacementDiffNameOp());
-		this.operatorSpace.register(new MethodXMethodReplacementDiffArgumentsOp());
-		this.operatorSpace.register(new MethodXMethodReplacementArgumentRemoveOp());
-		this.operatorSpace.register(new MethodXVariableReplacementOp());
-		this.operatorSpace.register(new UnwrapfromMethodCallOp());
-		this.operatorSpace.register(new UnwrapfromTryOp());
-		this.operatorSpace.register(new UnwrapfromIfOp());
-		this.operatorSpace.register(new LogicRedOperator());
-		this.operatorSpace.register(new VarReplacementByMethodCallOp());
-		this.operatorSpace.register(new OperatorReplacementOp());
-		this.operatorSpace.register(new ConstReplacementOp());
+
+		for (List<AstorOperator> astorOperationsFromAbstractOperator : operators.values()) {
+			// We register all operators
+			for (AstorOperator astorOperator : astorOperationsFromAbstractOperator) {
+				this.operatorSpace.register(astorOperator);
+			}
+
+		}
+
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -130,7 +179,7 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 	public void startEvolution() throws Exception {
 
 		dateInitEvolution = new Date();
-		// We don't evolve variants, so the generation is always one.
+		int maxMinutes = ConfigurationProperties.getPropertyInt("maxtime");
 		generationsExecuted = 1;
 		modifPointsAnalyzed = 0;
 		evaluatedProgramVariants.clear();
@@ -166,10 +215,18 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 
 				if (existsSolution) {
 
-					if (ConfigurationProperties.getPropertyBool("stopfirst")) {
+					if (ConfigurationProperties.getPropertyBool("stopfirst") || (this.solutions
+							.size() >= ConfigurationProperties.getPropertyInt("maxnumbersolutions"))) {
 						this.setOutputStatus(AstorOutputStatus.STOP_BY_PATCH_FOUND);
 						return;
 					}
+				}
+
+				if (!belowMaxTime(dateInitEvolution, maxMinutes)) {
+
+					this.setOutputStatus(AstorOutputStatus.TIME_OUT);
+					log.info("Max time reached");
+					return;
 				}
 			}
 		}
@@ -187,14 +244,11 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 	public boolean analyzeModificationPoint(ProgramVariant parentVariant, ModificationPoint iModifPoint)
 			throws Exception {
 
-		int generation = 1;
-
 		boolean existSolution = false;
 
 		PredictionResult predictionsForModifPoint = computePredictionsForModificationPoint(iModifPoint);
 
 		log.info("Elements to modify in MP " + iModifPoint.identified + ": " + predictionsForModifPoint.size());
-		this.predictions.put(iModifPoint, predictionsForModifPoint);
 
 		// No prediction, so, we return
 		if (predictionsForModifPoint.isEmpty()) {
@@ -202,15 +256,13 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 			return false;
 		}
 
-		this.predictions.put(iModifPoint, predictionsForModifPoint);
-
 		// Hard Reset pool
 		ingredientPool = null;
-		int i = 0;
+		int iPredictionOfPoint = 0;
 		for (IPrediction i_prediction : predictionsForModifPoint) {
-			log.info("Prediction nr " + (++i) + "/" + predictionsForModifPoint.size());
+			log.info("Prediction nr " + (++iPredictionOfPoint) + "/" + predictionsForModifPoint.size());
 
-			existSolution = analyzePrediction(parentVariant, iModifPoint, generation, i_prediction);
+			existSolution = analyzePrediction(parentVariant, iModifPoint, i_prediction);
 
 			if (existSolution && ConfigurationProperties.getPropertyBool("stopfirst")) {
 				return true;
@@ -219,14 +271,14 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 		return existSolution;
 	}
 
-	public boolean analyzePrediction(ProgramVariant parentVariant, ModificationPoint iModifPoint, int generation,
+	public boolean analyzePrediction(ProgramVariant parentVariant, ModificationPoint iModifPoint,
 			IPrediction i_prediction) {
 
-		boolean existSolution = false;
 		List<AstorOperator> allOperationsPredicted = i_prediction.getAllOperationsPredicted();
 
 		log.info("Predicted operators for " + iModifPoint.identified + " : " + allOperationsPredicted);
 
+		// if it's not initialized
 		initDynaPool(iModifPoint, allOperationsPredicted);
 
 		/// Here will be the resulting variants:
@@ -244,9 +296,15 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 
 			List<AstorOperator> candidateOperators = i_prediction.getPrediction(predictionElement);
 
+			if (candidateOperators == null || candidateOperators.isEmpty()) {
+				log.error("No predicted operator for Target element: " + targetElement
+						+ ", where prediction element is: " + predictionElement);
+				continue;
+			}
+
 			AstorOperator operator = getSingleOperator(candidateOperators);
 
-			log.info("Target " + targetElement + " operator " + operator);
+			log.info("Target: " + targetElement + ", operator applied:" + operator);
 
 			if (operator == null) {
 				log.error("No operator to apply");
@@ -260,8 +318,6 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 
 			try {
 				List<OperatorInstance> instancesOfOperatorForModificationPoint = null;
-
-				//
 
 				log.debug("***MP " + iModifPoint.identified + " operator " + operator);
 
@@ -316,16 +372,29 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 			}
 
 		}
+
+		if (opToInstances.isEmpty()) {
+			log.debug("Any op instance after the prediction of mp: " + iModifPoint.identified);
+			return false;
+		}
+
 		// Create the Program variant
 		List<ProgramVariant> programVariantsOfPrediction = createVariants(opToInstances, parentVariant);
 		allProgramVariants.addAll(programVariantsOfPrediction);
 
 		// EVALUATION
 
+		return evaluateProgramVariant(i_prediction, allProgramVariants);
+
+	}
+
+	public boolean evaluateProgramVariant(IPrediction i_prediction, List<ProgramVariant> allProgramVariants) {
 		// For each candidate variant
+		boolean existSolution = false;
+
 		for (ProgramVariant iProgramVariant : allProgramVariants) {
 
-			this.generationsExecuted++;
+			// this.generationsExecuted++;
 
 			// Apply the code transformations
 			for (OperatorInstance operatorInstance : iProgramVariant.getAllOperations()) {
@@ -339,18 +408,16 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 				// Each program variant is a patch
 				boolean resultValidation = this.processCreatedVariant(iProgramVariant, generationEval);
 				if (resultValidation) {
-					// TODO
-					// log.info("Solution found with Target " + targetElement + " operator " +
-					// operator);
 
 					this.solutions.add(iProgramVariant);
 					existSolution = true;
 					// storing pred
-					// predictedCtElementWithSol.add(i_prediction, predictionElement);
+					predictedVariantWithSol.add(i_prediction, iProgramVariant);
 				}
 				if (ConfigurationProperties.getPropertyBool("saveallevaluatedvariants")) {
 					this.evaluatedProgramVariants.add(iProgramVariant);
 				}
+				saveAttempts(i_prediction, iProgramVariant);
 
 				// Undo the code transformations
 				for (OperatorInstance operatorInstance : iProgramVariant.getAllOperations()) {
@@ -367,10 +434,27 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 				e.printStackTrace();
 			}
 		}
-
-		// end prediction
 		return existSolution;
+	}
 
+	private void saveAttempts(IPrediction i_prediction, ProgramVariant iProgramVariant) {
+		int v = 0;
+		VariantValidationResult validation = iProgramVariant.getValidationResult();
+		if (validation != null) {
+
+			if (validation instanceof MetaValidationResult) {
+				MetaValidationResult mvalidation = (MetaValidationResult) validation;
+				v = mvalidation.getAllCandidates().size();
+			} else {
+				// a single validation
+				v = 1;
+			}
+		}
+		Integer atpred = this.attempts.get(i_prediction);
+		if (atpred == null) {
+			atpred = 0;
+		}
+		this.attempts.put(i_prediction, (atpred + v));
 	}
 
 	/**
@@ -476,9 +560,6 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 		return null;
 	}
 
-	// List<IPrediction> predictWithSol = new ArrayList<>();
-	MapList<IPrediction, PredictionElement> predictedCtElementWithSol = new MapList<>();
-
 	/**
 	 * Returns true if there is an operator that needs ingredient
 	 * 
@@ -503,23 +584,28 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 
 		if (this.predictor != null) {
 			try {
-				return predictor.computePredictionsForModificationPoint(iModifPoint);
+				PredictionResult pr = predictor.computePredictionsForModificationPoint(iModifPoint);
+				this.predictions.put(iModifPoint, pr);
+				return pr;
 			} catch (Exception e) {
 				log.error("#rror when calling predictor");
 				log.error(e);
+				this.predictions.put(iModifPoint, null);
 				return null;
 			}
 
 		} else {
-			// No predictor, so we put all the operations available
+			PredictionResult rp = new PredictionResult();
 			List<AstorOperator> ops = this.operatorSpace.getOperators();
-			Prediction optoapply = new Prediction();
-			optoapply.put(new PredictionElement(iModifPoint.getCodeElement()), ops);
 
-			PredictionResult pr = new PredictionResult();
-			pr.add(optoapply);
-
-			return pr;
+			// No predictor, so we put all the operations available
+			for (AstorOperator astorOperator : ops) {
+				Prediction optoapply = new Prediction();
+				optoapply.add(new PredictionElement(iModifPoint.getCodeElement()), astorOperator);
+				rp.add(optoapply);
+			}
+			this.predictions.put(iModifPoint, rp);
+			return rp;
 		}
 	}
 
@@ -597,6 +683,7 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 			int candidateNumber = 1;
 			for (Map<Integer, Integer> candidate : allCandidates) {
 
+				this.generationsExecuted++;
 				log.debug("Evaluating candidate nr " + candidateNumber + " out of " + allCandidates.size());
 				log.debug("Feature of candidate " + candidateNumber + ": " + candidate);
 				// for each point we put a value:
@@ -620,20 +707,19 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 			}
 
 			variant.setValidationResult(megavalidation);
+			variant.setIsSolution(megavalidation.isSuccessful());
 
 			return megavalidation;
 
-		} else
+		} else {
+			this.generationsExecuted++;
 			// by default
 			return super.validateInstance(variant);
-
+		}
 	}
 
 	@Override
 	public void atEnd() {
-
-		// Now, predictions
-		// outPredictions();
 
 		// Replace meta per "plain" variants
 		List<ProgramVariant> previousSolutions = new ArrayList(this.solutions);
@@ -652,8 +738,6 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 
 					plainNewVariantSolution.setId(this.generationsExecuted++);
 					// Apply the changes
-					// plainNewVariantSolution.getAllOperations().stream().forEach(e ->
-					// e.applyModification());
 
 					for (OperatorInstance oi : plainNewVariantSolution.getAllOperations()) {
 
@@ -667,9 +751,12 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 						// Check if solution
 						boolean isSolution = this.processCreatedVariant(plainNewVariantSolution, 1);
 						log.info("Ckecking solution of " + plainNewVariantSolution.getId() + " : " + isSolution);
-						if ((isSolution))
+						if ((isSolution)) {
 							this.solutions.add(plainNewVariantSolution);
-						else
+							// Save the "parent" relation between the variants
+							this.metaToConcrete.add(metap, plainNewVariantSolution);
+
+						} else
 							log.error("Failing Verification of " + plainNewVariantSolution.getId());
 
 					} catch (Exception e1) {
@@ -677,8 +764,6 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 						e1.printStackTrace();
 					}
 					// Undo the changes
-					// plainNewVariantSolution.getAllOperations().stream().forEach(e ->
-					// e.undoModification());
 					for (int i = plainNewVariantSolution.getAllOperations().size() - 1; i >= 0; i--) {
 						OperatorInstance opi = plainNewVariantSolution.getAllOperations().get(i);
 						opi.undoModification();
@@ -715,32 +800,90 @@ public class MultiMetaEvalTOSApproach extends EvalTOSClusterApproach {
 		Collections.sort(mpKey);
 		for (ModificationPoint imp : mpKey) {
 			PredictionResult pr = this.predictions.get(imp);
-			// TODO: for all.
-			IPrediction ipred = pr.get(0);
-			JsonElement jsonprediction = ipred.toJson();
+
 			JsonObject mpobj = new JsonObject();
+			mpoints.add(mpobj);
 			mpobj.addProperty("id", imp.identified);
 			mpobj.addProperty("line", imp.getCodeElement().getPosition().getLine());
 			mpobj.addProperty("file", imp.getCodeElement().getPosition().getFile().getName());
 
 			JsonObject predictionroot = new JsonObject();
 			predictionroot.add("modif_point", mpobj);
-			predictionroot.add("prediction", jsonprediction);
 
-			JsonArray solut = new JsonArray();
-			if (this.predictedCtElementWithSol.keySet().contains(ipred)) {
-				List<PredictionElement> pred = this.predictedCtElementWithSol.get(ipred);
-				for (PredictionElement psol : pred) {
-					solut.add(psol.getIndex());
+			JsonArray arraypred = new JsonArray();
+			mpobj.add("predictions", arraypred);
+
+			for (IPrediction iPrediction : pr) {
+				if (iPrediction == null)
+					continue;
+
+				JsonObject predjson = new JsonObject();
+				JsonElement jsonprediction = iPrediction.toJson();
+				arraypred.add(predjson);
+				predjson.add("info", jsonprediction);
+
+				//
+				Integer attemptsOfPrediction = this.attempts.get(iPrediction);
+				predjson.addProperty("attempts", attemptsOfPrediction);
+
+				//
+				JsonArray solut = new JsonArray();
+				predjson.add("patches", solut);
+				if (this.predictedVariantWithSol.keySet().contains(iPrediction)) {
+
+					List<ProgramVariant> pred = this.predictedVariantWithSol.get(iPrediction);
+					for (ProgramVariant variantWithSolution : pred) {
+
+						if (variantWithSolution.isSolution()) {
+
+							if (this.metaToConcrete.containsKey(variantWithSolution)) {
+								for (ProgramVariant concreteVariantForMeta : this.metaToConcrete
+										.get(variantWithSolution)) {
+									log.info("Getting conc diff from " + concreteVariantForMeta.getId());
+
+									solut.add(
+											concreteVariantForMeta.getPatchDiff().getOriginalStatementAlignmentDiff());
+								}
+
+							} else {
+								// it's not a meta variant
+								log.info("Getting normal diff from " + variantWithSolution.getId());
+								if (variantWithSolution.getPatchDiff() != null) {
+									solut.add(variantWithSolution.getPatchDiff().getOriginalStatementAlignmentDiff());
+								} else
+									log.error("variant without diff " + variantWithSolution.getId());
+							}
+
+						}
+					}
 				}
-			}
 
-			predictionroot.add("solutions", solut);
-			mpoints.add(predictionroot);
+			}
 
 		}
 
 		System.out.println("predout=" + root);
+
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String ppjson = gson.toJson(root);
+
+		// String out = (ConfigurationProperties.getProperty("out") != null) ?
+		// ConfigurationProperties.getProperty("out")
+		// : ConfigurationProperties.getProperty("workingDirectory");
+		String out = this.projectFacade.getProperties().getWorkingDirRoot();
+		String outpath = out + File.separator + "prediction" + ".json";
+		log.info("Saving json at \n" + outpath);
+		try {
+			FileWriter fw = new FileWriter(new File(outpath));
+			fw.write(ppjson);
+			fw.flush();
+			fw.close();
+		} catch (IOException e) {
+
+			e.printStackTrace();
+			log.error(e);
+		}
+
 	}
 
 	public List<ProgramVariant> getEvaluatedProgramVariants() {

@@ -124,7 +124,7 @@ public class AstorMain extends AbstractMain {
 		List<String> tr = FinderTestCases.findTestCasesForRegression(
 				projectFacade.getOutDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT), projectFacade);
 		projectFacade.getProperties().setRegressionCases(tr);
-
+		log.debug("Test retrieved from classes: " + tr.size());
 		// Initialize Population
 
 		if (ConfigurationProperties.getPropertyBool("skipfaultlocalization")) {
@@ -239,6 +239,9 @@ public class AstorMain extends AbstractMain {
 		}
 
 		String dependencies = ConfigurationProperties.getProperty("dependenciespath");
+		dependencies += (ConfigurationProperties.hasProperty("extendeddependencies"))
+				? (File.pathSeparator + ConfigurationProperties.hasProperty("extendeddependencies"))
+				: "";
 		String failing = ConfigurationProperties.getProperty("failing");
 		String location = ConfigurationProperties.getProperty("location");
 		String packageToInstrument = ConfigurationProperties.getProperty("packageToInstrument");

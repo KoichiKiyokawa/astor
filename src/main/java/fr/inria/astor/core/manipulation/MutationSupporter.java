@@ -68,6 +68,7 @@ public class MutationSupporter {
 		factory.getEnvironment().setCommentEnabled(false);
 		factory.getEnvironment().setNoClasspath(ConfigurationProperties.getPropertyBool("noclasspathspoon"));
 		factory.getEnvironment().setPreserveLineNumbers(ConfigurationProperties.getPropertyBool("preservelinenumbers"));
+		factory.getEnvironment().setIgnoreDuplicateDeclarations(true);
 
 		jdtSpoonModelBuilder = new JDTBasedSpoonCompiler(factory);
 
@@ -148,7 +149,7 @@ public class MutationSupporter {
 		if (factory == null) {
 			factory = createFactory();
 			factory.getEnvironment().setLevel("OFF");
-			factory.getEnvironment().setSelfChecks(true);
+			// factory.getEnvironment().setSelfChecks(true);
 
 		}
 		return factory;
@@ -184,7 +185,8 @@ public class MutationSupporter {
 	public static Environment getEnvironment() {
 		StandardEnvironment env = new StandardEnvironment();
 
-		env.setComplianceLevel(ConfigurationProperties.getPropertyInt("javacompliancelevel"));
+		Integer complianceLevel = ConfigurationProperties.getPropertyInt("javacompliancelevel");
+		env.setComplianceLevel((complianceLevel > 2) ? complianceLevel : 3);
 		env.setVerbose(false);
 		env.setDebug(true);
 		env.setTabulationSize(5);

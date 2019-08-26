@@ -2,6 +2,7 @@ package fr.inria.astor.core.solutionsearch;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -193,6 +195,17 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		// Reporting results
 		for (ReportResults out : this.getOutputResults()) {
 			out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
+		}
+
+		if (ConfigurationProperties.getPropertyBool("removeworkingfolder")) {
+			File fout = new File(output);
+
+			try {
+				FileUtils.deleteDirectory(fout);
+			} catch (IOException e) {
+				e.printStackTrace();
+				log.error(e);
+			}
 		}
 
 	}
@@ -567,60 +580,67 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		String line = "";
 		line += "\n --SOLUTIONS DESCRIPTION--\n";
 		for (ProgramVariant solutionVariant : variants) {
-			line += "\n ----\n";
-			line += "ProgramVariant " + solutionVariant.getId() + "\n ";
-			line += "\ntime(sec)= "
-					+ TimeUtil.getDateDiff(this.dateInitEvolution, solutionVariant.getBornDate(), TimeUnit.SECONDS);
+			line += getSolutionString(generation, solutionVariant);
+		}
+		return line;
+	}
 
-			for (int i = 1; i <= generation; i++) {
-				List<OperatorInstance> genOperationInstances = solutionVariant.getOperations().get(i);
-				if (genOperationInstances == null)
-					continue;
+	public String getSolutionString(int generation, ProgramVariant solutionVariant) {
+		String line = "";
+		line += "\n ----\n";
+		line += "ProgramVariant " + solutionVariant.getId() + "\n ";
+		long dateDiff = TimeUtil.getDateDiff(this.dateInitEvolution, solutionVariant.getBornDate(), TimeUnit.SECONDS);
+		line += "\ntime(sec)= " + dateDiff;
 
-				for (OperatorInstance genOperationInstance : genOperationInstances) {
+		for (int i = 1; i <= generation; i++) {
+			List<OperatorInstance> genOperationInstances = solutionVariant.getOperations().get(i);
+			if (genOperationInstances == null)
+				continue;
 
-					line += "\noperation: " + genOperationInstance.getOperationApplied().toString() + "\nlocation= "
-							+ genOperationInstance.getModificationPoint().getCtClass().getQualifiedName();
+			for (OperatorInstance genOperationInstance : genOperationInstances) {
 
-					if (genOperationInstance.getModificationPoint() instanceof SuspiciousModificationPoint) {
-						SuspiciousModificationPoint gs = (SuspiciousModificationPoint) genOperationInstance
-								.getModificationPoint();
-						line += "\nline= " + gs.getSuspicious().getLineNumber();
-						line += "\nlineSuspiciousness= " + gs.getSuspicious().getSuspiciousValueString();
-					}
-					line += "\nlineSuspiciousness= " + genOperationInstance.getModificationPoint().identified;
-					line += "\noriginal statement= " + genOperationInstance.getOriginal().toString();
-					line += "\nbuggy kind= " + genOperationInstance.getOriginal().getClass().getSimpleName() + "|"
-							+ genOperationInstance.getOriginal().getParent().getClass().getSimpleName();
+				line += "\noperation: " + genOperationInstance.getOperationApplied().toString() + "\nlocation= "
+						+ genOperationInstance.getModificationPoint().getCtClass().getQualifiedName();
 
-					line += "\nfixed statement= ";
-					if (genOperationInstance.getModified() != null) {
-						// if fix content is the same that original buggy
-						// content, we do not write the patch, remaining empty
-						// the property fixed statement
-						if (genOperationInstance.getModified().toString() != genOperationInstance.getOriginal()
-								.toString())
-							line += genOperationInstance.getModified().toString();
-						else {
-							line += genOperationInstance.getOriginal().toString();
-						}
-						// Information about types Parents
-
-						line += "\nPatch kind= " + genOperationInstance.getModified().getClass().getSimpleName() + "|"
-								+ genOperationInstance.getModified().getParent().getClass().getSimpleName();
-					}
-					line += "\ngeneration= " + Integer.toString(i);
-					line += "\ningredientScope= " + ((genOperationInstance.getIngredientScope() != null)
-							? genOperationInstance.getIngredientScope()
-							: "-");
-
-					if (genOperationInstance.getIngredient() != null
-							&& genOperationInstance.getIngredient().getDerivedFrom() != null)
-						line += "\ningredientParent= " + genOperationInstance.getIngredient().getDerivedFrom();
-
+				if (genOperationInstance.getModificationPoint() instanceof SuspiciousModificationPoint) {
+					SuspiciousModificationPoint gs = (SuspiciousModificationPoint) genOperationInstance
+							.getModificationPoint();
+					line += "\nline= " + gs.getSuspicious().getLineNumber();
+					line += "\nlineSuspiciousness= " + gs.getSuspicious().getSuspiciousValueString();
 				}
+				line += "\nlineSuspiciousness= " + genOperationInstance.getModificationPoint().identified;
+				line += "\noriginal statement= " + genOperationInstance.getOriginal().toString();
+				line += "\nbuggy kind= " + genOperationInstance.getOriginal().getClass().getSimpleName() + "|"
+						+ genOperationInstance.getOriginal().getParent().getClass().getSimpleName();
+
+				line += "\nfixed statement= ";
+				if (genOperationInstance.getModified() != null) {
+					// if fix content is the same that original buggy
+					// content, we do not write the patch, remaining empty
+					// the property fixed statement
+					if (genOperationInstance.getModified().toString() != genOperationInstance.getOriginal().toString())
+						line += genOperationInstance.getModified().toString();
+					else {
+						line += genOperationInstance.getOriginal().toString();
+					}
+					// Information about types Parents
+
+					line += "\nPatch kind= " + genOperationInstance.getModified().getClass().getSimpleName() + "|"
+							+ genOperationInstance.getModified().getParent().getClass().getSimpleName();
+				}
+				line += "\ngeneration= " + Integer.toString(i);
+				line += "\ningredientScope= " + ((genOperationInstance.getIngredientScope() != null)
+						? genOperationInstance.getIngredientScope()
+						: "-");
+
+				if (genOperationInstance.getIngredient() != null
+						&& genOperationInstance.getIngredient().getDerivedFrom() != null)
+					line += "\ningredientParent= " + genOperationInstance.getIngredient().getDerivedFrom();
+
 			}
-			line += "\nvalidation=" + solutionVariant.getValidationResult().toString();
+		}
+		line += "\nvalidation=" + solutionVariant.getValidationResult().toString();
+		if (solutionVariant.getPatchDiff() != null) {
 			String diffPatch = solutionVariant.getPatchDiff().getFormattedDiff();
 			line += "\ndiffpatch=" + diffPatch;
 			String diffPatchoriginal = solutionVariant.getPatchDiff().getOriginalStatementAlignmentDiff();
@@ -719,9 +739,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		ConfigurationProperties.setProperty("forceExecuteRegression", Boolean.TRUE.toString());
 
 		// Initial validation and fitness
-		long inittime = System.currentTimeMillis();
 		VariantValidationResult validationResult = validateInstance(originalVariant);
-		long endtime = System.currentTimeMillis();
 
 		if (validationResult == null) {
 			log.error("Initial run of test suite fails");
@@ -730,15 +748,10 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 			throw new IllegalStateException("The application under repair has not failling test cases");
 		}
 
-		if (ConfigurationProperties.getPropertyBool("overridemaxtime")) {
-			Long diff = (endtime - inittime) * 2;// in milliseconds
-			ConfigurationProperties.setProperty("tmax2", diff.toString());
-		}
-
 		double fitness = this.fitnessFunction.calculateFitnessValue(validationResult);
 		originalVariant.setFitness(fitness);
 
-		log.debug("The original fitness is : " + fitness);
+		log.info("The original fitness is : " + fitness);
 		for (ProgramVariant initvariant : variants) {
 			initvariant.setFitness(fitness);
 		}
@@ -795,8 +808,32 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 			log.error("Problem compiling the model with compliance level "
 					+ ConfigurationProperties.getPropertyInt("javacompliancelevel"));
 			log.error(e.getMessage());
-			throw e;
+			e.printStackTrace();
+			try {
+				mutatorSupporter.cleanFactory();
+				log.info("Recompiling with compliance level "
+						+ ConfigurationProperties.getPropertyInt("alternativecompliancelevel"));
+				mutatorSupporter.getFactory().getEnvironment()
+						.setComplianceLevel(ConfigurationProperties.getPropertyInt("alternativecompliancelevel"));
+				mutatorSupporter.buildModel(codeLocation, bytecodeLocation, cpArray);
+
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				log.error("Error compiling: " + e2.getMessage());
+				if (!ConfigurationProperties.getPropertyBool("continuewhenmodelfail")) {
+					log.error("Astor does not continue when model build fails");
+					throw e2;
+				} else {
+
+					log.error("Astor continues when model build fails. Classes created: "
+							+ mutatorSupporter.getFactory().Type().getAll().size());
+
+				}
+
+			}
+
 		}
+		log.info("Number of CtTypes created: " + mutatorSupporter.getFactory().Type().getAll().size());
 
 		///// ONCE ASTOR HAS BUILT THE MODEL,
 		///// We apply different processes and manipulation over it.
@@ -830,7 +867,9 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		this.originalVariant = variants.get(0);
 
 		if (originalVariant.getModificationPoints().isEmpty()) {
-			throw new IllegalStateException("Variant without any modification point. It must have at least one.");
+			// throw new IllegalStateException("Variant without any modification point. It
+			// must have at least one.");
+			log.error("[warning] Any modification point in variant");
 		}
 	}
 
@@ -902,7 +941,21 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	}
 
 	public List<SuspiciousCode> calculateSuspicious() throws Exception {
-		return this.getFaultLocalization().searchSuspicious(getProjectFacade()).getCandidates();
+		long inittime = System.currentTimeMillis();
+		List<SuspiciousCode> susp = this.getFaultLocalization().searchSuspicious(getProjectFacade()).getCandidates();
+
+		long endtime = System.currentTimeMillis();
+		// milliseconds
+		Long diffTime = (endtime - inittime);
+
+		log.debug("Executing time Fault localization: " + diffTime / 1000 + " sec");
+
+		if (ConfigurationProperties.getPropertyBool("overridemaxtime")) {
+			Long newMaxtime = diffTime * ConfigurationProperties.getPropertyInt("maxtimefactor");
+			log.info("Setting up the max to " + newMaxtime + " milliseconds (" + newMaxtime / 1000 + " sec)");
+			ConfigurationProperties.setProperty("tmax2", newMaxtime.toString());
+		}
+		return susp;
 	}
 
 	public List<TargetElementProcessor<?>> getTargetElementProcessors() {

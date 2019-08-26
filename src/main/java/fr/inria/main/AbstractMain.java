@@ -1,11 +1,15 @@
 package fr.inria.main;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -17,6 +21,12 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.approaches.levenshtein.LevenFacade;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.output.ReportResults;
 import fr.inria.astor.core.setup.ConfigurationProperties;
@@ -62,6 +72,7 @@ public abstract class AbstractMain {
 	static {
 		options.addOption("id", true, "(Optional) Name/identified of the project to evaluate (Default: folder name)");
 		options.addOption("mode", true, " (Optional) Mode (Default: jGenProg Mode)");
+		options.addOption("autoconfigure", false, " Auto-configure project. Must install ");
 		options.addOption("location", true, "URL of the project to manipulate");
 		options.addOption("dependencies", true,
 				"dependencies of the application, separated by char " + File.pathSeparator);
@@ -644,12 +655,113 @@ public abstract class AbstractMain {
 		if (cmd.hasOption("autocompile"))
 			ConfigurationProperties.properties.setProperty("autocompile", cmd.getOptionValue("autocompile"));
 
+		if (cmd.hasOption("autoconfigure")) {
+			executeAutoConfigure(ConfigurationProperties.properties.getProperty("location"));
+		}
+
 		log.info("command line arguments: " + Arrays.toString(args).replace(",", " "));
 
 		// CLG believes, but is not totally confident in her belief, that this
 		// is a reasonable place to initialize the random number generator.
 		RandomManager.initialize();
 		return true;
+	}
+
+	private void executeAutoConfigure(String location) throws IOException {
+
+		log.debug("Determining project properties from " + location);
+		ProcessBuilder builder = new ProcessBuilder();
+
+		String mvnCommand = getMvnCommand();
+		if (mvnCommand == null || mvnCommand.trim().isEmpty()) {
+			throw new IllegalArgumentException(
+					"To execute autoconfigure please add the maven command in your path or add it to the property 'mvndir'");
+		}
+		String projectInfoCommand = ConfigurationProperties.getProperty("projectinfocommand");
+		builder.command(mvnCommand, projectInfoCommand, "-q");
+
+		builder.directory(new File(location));
+
+		Process process = builder.start();
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		String content = "";
+		String line;
+		while ((line = reader.readLine()) != null) {
+			content += line + "\n";
+		}
+		log.debug(content);
+		JsonElement jelement = new JsonParser().parse(content);
+		JsonObject jobject = jelement.getAsJsonObject();
+
+		String basedir = jobject.get("baseDir").getAsString();
+		String compliance = jobject.get("complianceLevel").toString();
+		JsonArray sources = jobject.get("sources").getAsJsonArray();
+		JsonArray binSources = jobject.get("binSources").getAsJsonArray();
+		JsonArray binTests = jobject.get("binTests").getAsJsonArray();
+		JsonArray tests = jobject.get("tests").getAsJsonArray();
+		JsonArray classpath = jobject.get("classpath").getAsJsonArray();
+
+		String testProp = getJoin(tests).replace(basedir, "");
+		String sourcesP = getJoin(sources).replace(basedir, "");
+		String binSourcesP = getJoin(binSources).replace(basedir, "");
+		String binTestsP = getJoin(binTests).replace(basedir, "");
+		String classpathP = getJoin(classpath);
+
+		log.debug("basedir: " + basedir);
+		log.debug("test: " + testProp);
+		log.debug("sources: " + sourcesP);
+		log.debug("binSourceP: " + binSourcesP);
+		log.debug("binTests: " + binTestsP);
+		log.debug("classpath: " + classpathP);
+		log.debug("compliance: " + compliance);
+
+		if (sourcesP.isEmpty()) {
+			throw new IllegalAccessError("Source folder could not be determined.");
+		}
+		ConfigurationProperties.properties.setProperty("javacompliancelevel", compliance);
+		ConfigurationProperties.properties.setProperty("srcjavafolder", sourcesP);
+		ConfigurationProperties.properties.setProperty("srctestfolder", testProp);
+		ConfigurationProperties.properties.setProperty("binjavafolder", binSourcesP);
+		ConfigurationProperties.properties.setProperty("bintestfolder", binTestsP);
+		ConfigurationProperties.properties.setProperty("dependenciespath", classpathP);
+
+	}
+
+	private String getJoin(JsonArray array) {
+		Iterator<JsonElement> it = array.iterator();
+		String result = "";
+		while (it.hasNext()) {
+			String element = it.next().getAsString();
+			result += element + File.pathSeparator;
+		}
+		if (result.length() > 0) {
+			// remove the last separator
+			result = result.substring(0, result.length() - 1);
+		}
+
+		return result;
+	}
+
+	public static String getMvnCommand() {
+		String mvnCommand = ConfigurationProperties.getProperty("mvndir");
+		if (mvnCommand == null) {
+			mvnCommand = findExecutableOnPath("mvn");
+		}
+		return mvnCommand;
+
+	}
+
+	public static String findExecutableOnPath(String name) {
+		Map p = System.getenv();
+		for (String dirname : System.getenv("PATH").split(File.pathSeparator)) {
+			File file = new File(dirname, name);
+			System.out.println(file + " " + file.exists());
+			if (file.isFile() && file.canExecute()) {
+				return file.getAbsolutePath();
+			}
+		}
+		return null;
 	}
 
 	/**
