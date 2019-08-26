@@ -116,7 +116,7 @@ public class ModificationPoint implements Comparable {
 		log.info("git result: " + res);
 	}
 
-	private void setCommitMessageByGitLogS(String originalProjectRootDir){
+	private void setCommitMessageByGitLogS(String originalProjectRootDir) {
 		String codeStr = this.getCodeElement().toString();
 		String[] args = String.format("git@log@-S@'%s'", codeStr).split("@");
 		String res = CommandExecuter.run(args, originalProjectRootDir);
@@ -126,7 +126,8 @@ public class ModificationPoint implements Comparable {
 
 	private String getFilePath() {
 		log.info("meta data: " + this.getCodeElement().getAllMetadata());
-		log.info("File Path: " + this.getCodeElement().getPath().toString());
+		// TODO: ファイルのパスがうまく取得できない
+		log.info("File Path: " + this.getCodeElement().getPath().relativePath().toString());
 		return this.getCodeElement().getPath().toString();
 	}
 }
