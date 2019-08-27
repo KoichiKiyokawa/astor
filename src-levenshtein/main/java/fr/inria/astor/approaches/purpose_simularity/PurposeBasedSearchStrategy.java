@@ -10,7 +10,7 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStr
 import fr.inria.astor.approaches.jgenprog.operators.ReplaceOp;
 
 public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
-	public String originalProjectRootDir = "./";
+	public String originalProjectRootDir;
 
 	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir) {
 		super(space);
@@ -23,7 +23,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 		List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
 		for (Ingredient baseElem : baseElements) {
-			baseElem.setCommitMessageByGitLogS(this.originalProjectRootDir);
+			baseElem.setCommitMessage(this.originalProjectRootDir);
 		}
 		// TODO: baseElementsをコミットメッセージに応じて並び替える
 

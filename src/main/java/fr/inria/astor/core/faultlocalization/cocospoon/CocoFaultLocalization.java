@@ -32,7 +32,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.support.RuntimeProcessingManager;
 
 /**
- * 
+ *
  * @author Matias Martinez
  *
  */
@@ -95,7 +95,7 @@ public class CocoFaultLocalization implements FaultLocalizationStrategy {
 		// We select the best X candidates.
 		int max = (candidates.size() < maxSuspCandidates) ? candidates.size() : maxSuspCandidates;
 		candidates = candidates.subList(0, max);
-		
+
 		FaultLocalizationResult flresults = new FaultLocalizationResult(candidates, testsfailing);
 
 		return flresults;
@@ -149,6 +149,7 @@ public class CocoFaultLocalization implements FaultLocalizationStrategy {
 	// Code properties.
 	public void initModel(ProjectRepairFacade projectFacade) throws Exception {
 
+		// MEMO: 相対パスの取得方法が参考になるかもしれない
 		String codeLocation = projectFacade.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
 		String bytecodeLocation = projectFacade.getOutDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
 		String classpath = projectFacade.getProperties().getDependenciesString();

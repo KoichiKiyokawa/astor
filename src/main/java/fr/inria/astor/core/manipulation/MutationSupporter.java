@@ -31,9 +31,9 @@ import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 /**
  * This class carries out all supporter task: e.g. creation of directories, copy
  * dirs, calls to compilations.
- * 
+ *
  * @author Matias Martinez, matias.martinez@inria.fr
- * 
+ *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class MutationSupporter {
@@ -97,7 +97,7 @@ public class MutationSupporter {
 	 * the project is saved on disk. Not any more: Additionally, the compiled class
 	 * are saved it on disk. Finally, the current Thread has a reference to a class
 	 * loader with the ProgramVariant
-	 * 
+	 *
 	 * @param instance
 	 * @throws Exception
 	 */
@@ -125,7 +125,7 @@ public class MutationSupporter {
 	/**
 	 * Save on disk Source code file Should be configured before:
 	 * .getSpoonClassCompiler().updateOutput(srcOutput);
-	 * 
+	 *
 	 * @param type
 	 * @return
 	 */
@@ -157,7 +157,7 @@ public class MutationSupporter {
 
 	/**
 	 * Creates a new spoon factory.
-	 * 
+	 *
 	 * @return
 	 */
 	public static Factory cleanFactory() {

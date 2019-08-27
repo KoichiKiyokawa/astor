@@ -79,10 +79,10 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
 
 /**
- *
- *
+ * 
+ * 
  * @author Matias Martinez, matias.martinez@inria.fr
- *
+ * 
  */
 public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
@@ -149,7 +149,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	protected List<PatchStat> patchInfo = new ArrayList<>();
 
 	/**
-	 *
+	 * 
 	 * @param mutatorExecutor
 	 * @throws JSAPException
 	 */
@@ -266,7 +266,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 	/**
 	 * Check whether the program has passed the maximum time for operating
-	 *
+	 * 
 	 * @param dateInit   start date of execution
 	 * @param maxMinutes max minutes for operating
 	 * @return
@@ -308,7 +308,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	/**
 	 * Store in the program variant passed as parameter a clone of each ctclass
 	 * involved in the variant.
-	 *
+	 * 
 	 * @param variant
 	 */
 	protected void storeModifiedModel(ProgramVariant variant) {
@@ -412,9 +412,9 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	}
 
 	/**
-	 *
+	 * 
 	 * Compiles and validates a created variant.
-	 *
+	 * 
 	 * @param parentVariant
 	 * @param generation
 	 * @return true if the variant is a solution. False otherwise.
@@ -472,7 +472,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 	/**
 	 * Undo in reverse order that the mutation were applied.
-	 *
+	 * 
 	 * @param variant
 	 * @param generation
 	 */
@@ -505,7 +505,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	/**
 	 * This method updates gens of a variant according to a created
 	 * GenOperationInstance
-	 *
+	 * 
 	 * @param variant
 	 * @param operationofGen
 	 */
@@ -700,7 +700,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	/**
 	 * By default, it initializes the spoon model. It should not be created before.
 	 * Otherwise, an exception occurs.
-	 *
+	 * 
 	 * @param suspicious
 	 * @throws Exception
 	 */
@@ -849,7 +849,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 	/**
 	 * Creates the variants from the suspicious code
-	 *
+	 * 
 	 * @param suspicious
 	 * @throws Exception
 	 */
@@ -876,7 +876,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	/**
 	 * This method updates modification point of a variant according to a created
 	 * GenOperationInstance
-	 *
+	 * 
 	 * @param variant        variant to modify the modification point information
 	 * @param operationofGen operator to apply in the variant.
 	 */
@@ -897,7 +897,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 	/**
 	 * Apply a given Mutation to the node referenced by the operation
-	 *
+	 * 
 	 * @param operation
 	 * @throws IllegalAccessException
 	 */
@@ -1331,7 +1331,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 	/**
 	 * Set the particularities of each approach
-	 *
+	 * 
 	 * @param hunk
 	 * @param genOperationInstance
 	 */
@@ -1339,7 +1339,6 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		// Nothing by default
 	}
 
-	// MEMO: 全体の流れが現れている
 	public void loadExtensionPoints() throws Exception {
 		this.loadFaultLocalization();
 		this.loadTargetElements();

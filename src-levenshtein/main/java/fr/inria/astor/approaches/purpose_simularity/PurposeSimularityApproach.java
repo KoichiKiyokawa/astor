@@ -1,6 +1,7 @@
 package fr.inria.astor.approaches.purpose_simularity;
 
 import com.martiansoftware.jsap.JSAPException;
+import org.apache.log4j.Logger;
 
 import fr.inria.astor.approaches.jgenprog.JGenProg;
 import fr.inria.astor.core.manipulation.MutationSupporter;
@@ -11,10 +12,15 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 import fr.inria.astor.approaches.purpose_simularity.PurposeBasedSearchStrategy;
 
 public class PurposeSimularityApproach extends JGenProg {
+  private String codeLocation;
+
+  protected Logger log = Logger.getLogger(this.getClass().getName());
   // とりまコンストラクタはそのまま
   public PurposeSimularityApproach(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade)
       throws JSAPException {
     super(mutatorExecutor, projFacade);
+    // ex) [/script/jGenProg_Defects4J_Chart_1/./source] -> /script/jGenProg_Defects4J_Chart_1/
+    this.codeLocation = projFacade.getProperties().getOriginalDirSrc().get(0).split("\\.")[0];
   }
 
   /**
@@ -25,8 +31,7 @@ public class PurposeSimularityApproach extends JGenProg {
   protected void loadIngredientSearchStrategy() throws Exception {
     IngredientPool ingredientspace = this.getIngredientPool();
     // TODO: ここで変数の正規化しても良い？
-    IngredientSearchStrategy ingStrategy = new PurposeBasedSearchStrategy(ingredientspace,
-        this.projectFacade.getOriginalProjectRootDir());
+    IngredientSearchStrategy ingStrategy = new PurposeBasedSearchStrategy(ingredientspace, this.codeLocation);
     this.setIngredientSearchStrategy(ingStrategy);
   }
 }

@@ -1,6 +1,8 @@
 package fr.inria.astor.core.entities;
 
 import java.util.List;
+import java.io.File;
+import java.io.IOException;
 
 import fr.inria.astor.util.CommandExecuter;
 import spoon.reflect.declaration.CtClass;
@@ -8,6 +10,13 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 
 import org.apache.log4j.Logger;
+
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.blame.BlameResult;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.api.errors.GitAPIException;
 
 /**
  * ModificationPoint of the program variant. It represents an element (i.e.
@@ -105,14 +114,42 @@ public class ModificationPoint implements Comparable {
 	}
 
 	public void setCommitMessage(String originalProjectRootDir) {
-		setCommitMessageByGitLogL(originalProjectRootDir);
+		log.info("originalProjectRootDir: " + originalProjectRootDir);
+		setCommitMessageByGitBlame(originalProjectRootDir);
+	}
+
+	private void setCommitMessageByGitBlame(String originalProjectRootDir) {
+		int lineNumber = this.getCodeElement().getPosition().getLine();
+		log.info("lineNumber: " + lineNumber);
+		String execCommand = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber, getFilePath(originalProjectRootDir));
+		log.info("exec cmd: " + execCommand);
+		String[] args = execCommand.split("@");
+		String res = CommandExecuter.run(args, originalProjectRootDir);
+		log.info("blame info made by cmd: " + res);
+
+		// try {
+		// 	Repository repo = new FileRepositoryBuilder().setGitDir(new File(originalProjectRootDir + ".git")).readEnvironment()
+		// 			.findGitDir().build();
+		// 	BlameResult blameResult = new Git(repo).blame().setFilePath(getFilePath(originalProjectRootDir)).call();
+		// 	if (blameResult == null) {
+		// 		log.info("blameResult is null");
+		// 	}
+		// 	RevCommit commit = blameResult.getSourceCommit(lineNumber - 1);
+		// 	if (commit == null) {
+		// 		log.info("commit is null");
+		// 	}
+		// 	log.info(commit.getFullMessage());
+		// } catch (IOException | GitAPIException e) {
+		// 	e.printStackTrace();
+		// }
 	}
 
 	// by `git log -L`
 	private void setCommitMessageByGitLogL(String originalProjectRootDir) {
-		int lineNumber = this.getCodeElement().getPosition().getSourceStart();
-		String[] args = String.format("git@log@-L@%d,%d:%s", lineNumber, lineNumber, getFilePath()).split("@");
+		int lineNumber = this.getCodeElement().getPosition().getLine();
+		String[] args = String.format("git@log@-L@%d,%d:%s", lineNumber, lineNumber, getFilePath(originalProjectRootDir)).split("@");
 		String res = CommandExecuter.run(args, originalProjectRootDir);
+		log.info("line number: " + lineNumber);
 		log.info("git result: " + res);
 	}
 
@@ -124,10 +161,15 @@ public class ModificationPoint implements Comparable {
 		// TODO: 結果をパースする
 	}
 
-	private String getFilePath() {
-		log.info("meta data: " + this.getCodeElement().getAllMetadata());
-		// TODO: ファイルのパスがうまく取得できない
-		log.info("File Path: " + this.getCodeElement().getPath().relativePath().toString());
-		return this.getCodeElement().getPath().toString();
+	private String getFilePath(String originalProjectRootDir) {
+		log.info("code element: " + this.getCodeElement().toString()); // 83行目
+		log.info("File Path: " + this.getCodeElement().getPath().toString()); // => File Path: #subPackage[name=org]#subPackage[name=apache]#subPackage[name=commons]#subPackage[name=math]#subPackage[name=distribution]#containedType[name=AbstractContinuousDistribution]#method[signature=inverseCumulativeProbability(double)]#body#statement[name=bracket]
+		String filename = this.getCodeElement().getPath().toString().split("containedType\\[name=")[1].split("]")[0];
+		log.info("filename: " + filename);
+		String[] args = String.format("git ls-files ./**/%s.java", filename).split(" ");
+		String res = CommandExecuter.run(args, originalProjectRootDir);
+		log.info("file path: " + res);
+
+		return res;
 	}
 }

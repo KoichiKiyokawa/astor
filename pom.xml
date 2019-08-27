@@ -122,8 +122,11 @@
         <groupId>org.apache.lucene</groupId>
         <version>3.6.1</version>
     </dependency>
-
-
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>5.4.0.201906121030-r</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>

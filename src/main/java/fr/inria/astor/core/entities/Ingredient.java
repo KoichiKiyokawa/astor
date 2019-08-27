@@ -115,18 +115,22 @@ public class Ingredient {
 		return metadata;
 	}
 
-	public void setCommitMessageByGitLogS(String originalProjectRootDir) {
-		String codeStr = this.toString();
-		String[] args = String.format("git@log@-S@'%s'", codeStr).split("@");
-		CommandExecuter.run(args, originalProjectRootDir);
-		// TODO: 結果をパースする
+	public void setCommitMessage(String originalProjectRootDir) {
+		// TOOD:
 	}
 
-	public void setCommitMessageByGitLogL(String originalProjectRootDir) {
-		int lineNumber = this.getCode().getPosition().getSourceStart();
-		String[] args = String.format("git@log@-L@%d,%d:%s", lineNumber, lineNumber, getFilePath()).split("@");
-		CommandExecuter.run(args, originalProjectRootDir);
-	}
+	// public void setCommitMessageByGitLogS(String originalProjectRootDir) {
+	// 	String codeStr = this.toString();
+	// 	String[] args = String.format("git@log@-S@'%s'", codeStr).split("@");
+	// 	CommandExecuter.run(args, originalProjectRootDir);
+	// 	// TODO: 結果をパースする
+	// }
+
+	// public void setCommitMessageByGitLogL(String originalProjectRootDir) {
+	// 	int lineNumber = this.getCode().getPosition().getSourceStart();
+	// 	String[] args = String.format("git@log@-L@%d,%d:%s", lineNumber, lineNumber, getFilePath()).split("@");
+	// 	CommandExecuter.run(args, originalProjectRootDir);
+	// }
 
 	private String getFilePath() {
 		log.info("File Path: " + this.getCode().getPath().toString());
