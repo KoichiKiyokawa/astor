@@ -671,6 +671,7 @@ public abstract class AbstractMain {
 
 		log.debug("Determining project properties from " + location);
 		ProcessBuilder builder = new ProcessBuilder();
+		builder.redirectErrorStream(true);
 
 		String mvnCommand = getMvnCommand();
 		if (mvnCommand == null || mvnCommand.trim().isEmpty()) {

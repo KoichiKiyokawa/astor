@@ -121,11 +121,13 @@ public class ModificationPoint implements Comparable {
 	private void setCommitMessageByGitBlame(String originalProjectRootDir) {
 		int lineNumber = this.getCodeElement().getPosition().getLine();
 		log.info("lineNumber: " + lineNumber);
-		String execCommand = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber, getFilePath(originalProjectRootDir));
+		String execCommand = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber,
+				getFilePath(originalProjectRootDir));
+		log.info("ls" + CommandExecuter.run("ls -al".split(" "), originalProjectRootDir));
 		log.info("exec cmd: " + execCommand);
 		String[] args = execCommand.split("@");
-		String[] res = CommandExecuter.exec(args, originalProjectRootDir);
-		log.info("blame info made by cmd: " + String.join("\n", res));
+		String res = CommandExecuter.run(args, originalProjectRootDir);
+		log.info("blame info made by cmd: " + res);
 
 		// try {
 		// 	Repository repo = new FileRepositoryBuilder().setGitDir(new File(originalProjectRootDir + ".git")).readEnvironment()
