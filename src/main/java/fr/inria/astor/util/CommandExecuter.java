@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class CommandExecuter {
   /**
@@ -50,5 +51,42 @@ public class CommandExecuter {
       e.printStackTrace();
     }
     return retStr;
+  }
+
+  public static String[] exec(String[] args, String relatilePathForWorkingDirectory) {
+    ArrayList<String> resultLines = new ArrayList<>();
+    try {
+      Runtime runtime = Runtime.getRuntime();
+      Process p = null;
+      File dir = new File(relatilePathForWorkingDirectory);// 実行ディレクトリの指定
+      try {
+        p = runtime.exec(args, null, dir); // 実行ディレクトリ(dir)でargsを実行する
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      try {
+        p.waitFor(); // プロセスの正常終了まで待機させる
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      InputStream is = p.getInputStream(); // プロセスの結果を変数に格納する
+      BufferedReader br = new BufferedReader(new InputStreamReader(is)); // テキスト読み込みを行えるようにする
+
+      while (true) {
+        String line = br.readLine();
+        if (line == null) {
+          break; // 全ての行を読み切ったら抜ける
+        } else {
+          resultLines.add(line);
+        }
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return resultLines.toArray(new String[resultLines.size()]);
   }
 }

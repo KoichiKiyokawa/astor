@@ -124,8 +124,8 @@ public class ModificationPoint implements Comparable {
 		String execCommand = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber, getFilePath(originalProjectRootDir));
 		log.info("exec cmd: " + execCommand);
 		String[] args = execCommand.split("@");
-		String res = CommandExecuter.run(args, originalProjectRootDir);
-		log.info("blame info made by cmd: " + res);
+		String[] res = CommandExecuter.exec(args, originalProjectRootDir);
+		log.info("blame info made by cmd: " + String.join("\n", res));
 
 		// try {
 		// 	Repository repo = new FileRepositoryBuilder().setGitDir(new File(originalProjectRootDir + ".git")).readEnvironment()

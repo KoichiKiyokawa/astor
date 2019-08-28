@@ -17,7 +17,7 @@ import spoon.reflect.factory.Factory;
 /**
  * Contains the properties of a project All properties are defined in
  * {@link ProjectPropertiesEnum}
- * 
+ *
  * @author Matias Martinez, matias.martinez@inria.fr
  *
  */
@@ -115,7 +115,7 @@ public class ProjectConfiguration {
 	 * Add the location given as parameters as project dependency. If the location
 	 * is a folder it adds all jar contained, if it's a file the method directly add
 	 * it.
-	 * 
+	 *
 	 * @param path
 	 */
 	public void addLocationToClasspath(String path) {
@@ -283,6 +283,9 @@ public class ProjectConfiguration {
 					return version;
 				}
 				processOutput += line;
+			}
+			if (br != null) {
+				br.close();
 			}
 
 		} catch (Exception e) {
