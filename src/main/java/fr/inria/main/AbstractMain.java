@@ -870,6 +870,7 @@ public abstract class AbstractMain {
 		launcher.getEnvironment().setShouldCompile(true);
 		launcher.getEnvironment().setSourceClasspath(properties.getDependenciesString().split(File.pathSeparator));
 		launcher.buildModel();
+		// TODO: ここで正規化を行えば、変換前のASTモデルも扱える
 		launcher.getModelBuilder().generateProcessedSourceFiles(OutputType.COMPILATION_UNITS);
 		launcher.getModelBuilder().compile(InputType.FILES);
 		// launcher.getModelBuilder().generateProcessedSourceFiles(OutputType.CLASSES);

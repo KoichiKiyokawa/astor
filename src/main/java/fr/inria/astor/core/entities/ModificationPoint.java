@@ -165,7 +165,7 @@ public class ModificationPoint implements Comparable {
 
 	private String getFilePath(String originalProjectRootDir) {
 		log.info("code element: " + this.getCodeElement().toString()); // 83行目
-		log.info("File Path: " + this.getCodeElement().getPath().toString()); // => File Path: #subPackage[name=org]#subPackage[name=apache]#subPackage[name=commons]#subPackage[name=math]#subPackage[name=distribution]#containedType[name=AbstractContinuousDistribution]#method[signature=inverseCumulativeProbability(double)]#body#statement[name=bracket]
+		log.info("Path: " + this.getCodeElement().getPath().toString()); // => File Path: #subPackage[name=org]#subPackage[name=apache]#subPackage[name=commons]#subPackage[name=math]#subPackage[name=distribution]#containedType[name=AbstractContinuousDistribution]#method[signature=inverseCumulativeProbability(double)]#body#statement[name=bracket]
 		String filename = this.getCodeElement().getPath().toString().split("containedType\\[name=")[1].split("]")[0];
 		log.info("filename: " + filename);
 		String[] args = String.format("git ls-files ./**/%s.java", filename).split(" ");

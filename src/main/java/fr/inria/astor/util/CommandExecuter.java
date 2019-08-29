@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 public class CommandExecuter {
   /**
    * 指定したディレクトリに移動してから、コマンドを実行 Reference)
@@ -19,6 +21,7 @@ public class CommandExecuter {
    *
    */
   public static String run(String[] args, String relatilePathForWorkingDirectory) {
+    Logger log = Logger.getLogger(CommandExecuter.class.getName());
     String retStr = "";
     try {
       String LINE_SEPA = "\n";
@@ -26,7 +29,11 @@ public class CommandExecuter {
       // getInputStream()で結果が帰ってこないことがあったので、標準出力と標準エラーを混ぜる
       // https://qiita.com/shintaness/items/6dd91260726e555c49e5
       pb.redirectErrorStream(true);
-      pb.directory(new File(relatilePathForWorkingDirectory));
+      pb.directory(new File(relativePathForWorkingDirectory));
+
+      log.info("command: " + String.join(" ", pb.command()));
+      log.info("directory: " + pb.directory());
+
       Process p = pb.start();
       InputStream in = null;
       BufferedReader br = null;
@@ -46,6 +53,7 @@ public class CommandExecuter {
         if (in != null) {
           in.close();
         }
+        log.info("exit value: " + p.exitValue());
       }
     } catch (IOException e) {
       e.printStackTrace();
