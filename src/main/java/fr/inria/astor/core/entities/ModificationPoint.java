@@ -167,7 +167,9 @@ public class ModificationPoint implements Comparable {
 		String[] args = String.format("git ls-files ./**/%s.java", filename).split(" ");
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		log.info("file path: " + res);
+		log.info("code: " + CommandExecuter.run(String.format("cat %s", originalProjectRootDir + res).split(" "),
+				originalProjectRootDir));
 
-		return res;
+		return originalProjectRootDir + res;
 	}
 }
