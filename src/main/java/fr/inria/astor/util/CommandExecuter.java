@@ -46,6 +46,8 @@ public class CommandExecuter {
           out.append(line + LINE_SEPA);
         }
         retStr = out.toString();
+      } catch (Throwable e) {
+        e.printStackTrace();
       } finally {
         if (br != null) {
           br.close();
@@ -53,8 +55,8 @@ public class CommandExecuter {
         if (in != null) {
           in.close();
         }
-        log.info("exit value: " + p.exitValue());
       }
+      log.info("exit value: " + p.exitValue());
     } catch (IOException e) {
       e.printStackTrace();
     }
