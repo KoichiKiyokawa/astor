@@ -15,12 +15,12 @@ public class CommandExecuter {
    * https://chat-messenger.com/blog/java/runtime-getruntime-exec
    *
    * @param args                            実行するコマンド
-   * @param relatilePathForWorkingDirectory 移動先のディレクトリ
+   * @param relativePathForWorkingDirectory 移動先のディレクトリ
    *
    * @return 実行結果の文字列
    *
    */
-  public static String run(String[] args, String relatilePathForWorkingDirectory) {
+  public static String run(String[] args, String relativePathForWorkingDirectory) {
     Logger log = Logger.getLogger(CommandExecuter.class.getName());
     String retStr = "";
     try {
@@ -61,12 +61,12 @@ public class CommandExecuter {
     return retStr;
   }
 
-  public static String[] exec(String[] args, String relatilePathForWorkingDirectory) {
+  public static String[] exec(String[] args, String relativePathForWorkingDirectory) {
     ArrayList<String> resultLines = new ArrayList<>();
     try {
       Runtime runtime = Runtime.getRuntime();
       Process p = null;
-      File dir = new File(relatilePathForWorkingDirectory);// 実行ディレクトリの指定
+      File dir = new File(relativePathForWorkingDirectory);// 実行ディレクトリの指定
       try {
         p = runtime.exec(args, null, dir); // 実行ディレクトリ(dir)でargsを実行する
       } catch (IOException e) {
