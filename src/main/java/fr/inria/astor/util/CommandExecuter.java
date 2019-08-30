@@ -22,45 +22,33 @@ public class CommandExecuter {
    */
   public static String run(String[] args, String relativePathForWorkingDirectory) {
     Logger log = Logger.getLogger(CommandExecuter.class.getName());
-    String retStr = "";
+    String LINE_SEPA = "\n";
+    ProcessBuilder pb = new ProcessBuilder(args);
+    // getInputStream()で結果が帰ってこないことがあったので、標準出力と標準エラーを混ぜる
+    // https://qiita.com/shintaness/items/6dd91260726e555c49e5
+    pb.redirectErrorStream(true);
+    pb.directory(new File(relativePathForWorkingDirectory));
+
+    log.info("command: " + String.join(" ", pb.command()));
+    log.info("directory: " + pb.directory());
+
     try {
-      String LINE_SEPA = "\n";
-      ProcessBuilder pb = new ProcessBuilder(args);
-      // getInputStream()で結果が帰ってこないことがあったので、標準出力と標準エラーを混ぜる
-      // https://qiita.com/shintaness/items/6dd91260726e555c49e5
-      pb.redirectErrorStream(true);
-      pb.directory(new File(relativePathForWorkingDirectory));
-
-      log.info("command: " + String.join(" ", pb.command()));
-      log.info("directory: " + pb.directory());
-
       Process p = pb.start();
       InputStream in = null;
       BufferedReader br = null;
-      try {
-        in = p.getInputStream();
-        StringBuffer out = new StringBuffer();
-        br = new BufferedReader(new InputStreamReader(in));
-        String line;
-        while ((line = br.readLine()) != null) {
-          out.append(line + LINE_SEPA);
-        }
-        retStr = out.toString();
-      } catch (Throwable e) {
-        e.printStackTrace();
-      } finally {
-        if (br != null) {
-          br.close();
-        }
-        if (in != null) {
-          in.close();
-        }
+      in = p.getInputStream();
+      StringBuffer out = new StringBuffer();
+      br = new BufferedReader(new InputStreamReader(in));
+      String line;
+      while ((line = br.readLine()) != null) {
+        out.append(line + LINE_SEPA);
       }
-      log.info("exit value: " + p.exitValue());
-    } catch (IOException e) {
+      p.waitFor();
+      return out.toString();
+    } catch (Exception e) {
       e.printStackTrace();
+      return "";
     }
-    return retStr;
   }
 
   public static String[] exec(String[] args, String relativePathForWorkingDirectory) {
