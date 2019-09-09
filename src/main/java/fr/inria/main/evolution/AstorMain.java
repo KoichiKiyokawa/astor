@@ -60,6 +60,7 @@ public class AstorMain extends AbstractMain {
 		// 修正対象のソースコードをコピーしてくる処理など
 		projectFacade.setupWorkingDirectories(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
 
+		// CAUTION: compileProjectメソッドで正規化を行なっているので、実行時にautocompileをtrueにしないと正規化が行われない
 		if (ConfigurationProperties.getPropertyBool("autocompile")) {
 			compileProject(projectFacade.getProperties());
 		}
@@ -101,6 +102,7 @@ public class AstorMain extends AbstractMain {
 			astorCore = new ScaffoldRepairEngine(mutSupporter, projectFacade);
 
 		} else if (ExecutionMode.Leven.equals(mode)) {
+			log.info("mode is Leven");
 			astorCore = new LevenshteinApproach(mutSupporter, projectFacade);
 
 		} else if (ExecutionMode.Purpose.equals(mode)) {
