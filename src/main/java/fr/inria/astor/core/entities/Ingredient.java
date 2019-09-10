@@ -26,6 +26,7 @@ public class Ingredient {
 
 	/** Added */
 	protected Logger log = Logger.getLogger(this.getClass().getName());
+	public String commitMessage = "";
 
 	public Ingredient(CtElement code, IngredientPoolScope scope, CtElement derivedFrom) {
 		super();
