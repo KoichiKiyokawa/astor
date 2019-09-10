@@ -81,6 +81,8 @@ public class MutationSupporter {
 		if (classpath != null && classpath.length > 0) {
 			jdtSpoonModelBuilder.setSourceClasspath(classpath);
 		}
+		// MEMO: JDTBasedSpoonCompiler#process(Collection<Processor<? extends CtElement>> processors)
+		// をつかってここで、NormalizeProcessorを発動させるのも良い？
 		jdtSpoonModelBuilder.build();
 
 		if (ConfigurationProperties.getPropertyBool("savespoonmodelondisk")) {
