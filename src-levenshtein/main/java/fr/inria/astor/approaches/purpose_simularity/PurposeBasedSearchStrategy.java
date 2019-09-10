@@ -12,9 +12,17 @@ import fr.inria.astor.approaches.jgenprog.operators.ReplaceOp;
 public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 	public String originalProjectRootDir;
 
+	final private String modelFileName = "commit_message_model.txt";
+
 	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir) {
 		super(space);
 		this.originalProjectRootDir = originalProjectRootDir;
+	}
+
+	private File getSavedModelFile() {
+		// ex) Math-2 -> math
+		String id = ConfigurationProperties.getProperty("projectIdentifier").split("-")[0].toLowerCase();
+		return new File(String.format("%s/%s", id, modelFileName));
 	}
 
 	@Override
@@ -25,7 +33,32 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 		for (Ingredient baseElem : baseElements) {
 			baseElem.setCommitMessage(this.originalProjectRootDir);
 		}
-		// TODO: baseElementsをコミットメッセージに応じて並び替える
+		// baseElementsをコミットメッセージに応じて並び替える
+		try {
+      ParagraphVectors vec = WordVectorSerializer.readParagraphVectors(getSavedModelFile());
+      TokenizerFactory t = new DefaultTokenizerFactory();
+      t.setTokenPreProcessor(new CommonPreprocessor());
+      vec.setTokenizerFactory(t);
+      // コサイン類似度を測定
+			// caution! モデルの中に存在していない文章は無理
+			Collections.sort(baseElements, new Comparator<Ingredient>() {
+				@Override
+				public int compare(Ingredient ingredientA, Ingredient ingredientB) {
+					INDArray vecIngredientA_CommitMessage = vec.inferVector(ingredientA.commitMessage);
+					INDArray vecIngredientB_CommitMessage = vec.inferVector(ingredientB.commitMessage);
+					INDArray vecModificationPointCommitMessage = vec.inferVector(modificationPoint.commitMessage);
+					double simA2modif = Transforms.cosineSim(vecIngredientA_CommitMessage, vecModificationPointCommitMessage);
+					double simB2modif = Transforms.cosineSim(vecIngredientB_CommitMessage, vecModificationPointCommitMessage);
+
+					return Double.compare(simA2modif, simB2modif);
+				}
+			});
+			// end sort
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
 
 		return null;
 	}
