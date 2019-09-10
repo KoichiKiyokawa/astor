@@ -34,6 +34,9 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     int attemptsBaseIngredients = 0;
 
     List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
+    for (Ingredient baseElem:baseElements){
+      log.info("base elem: " + baseElem);
+    }
 
     /**
      * baseElementsをレーベンシュタイン距離に基づいて並び替える
