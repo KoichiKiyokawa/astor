@@ -13,9 +13,12 @@ import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.manipulation.bytecode.OutputWritter;
 import fr.inria.astor.core.manipulation.sourcecode.ROOTTYPE;
 import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.astor.approaches.levenshtein.NormalizeProcessor;
+
 import spoon.OutputType;
 import spoon.SpoonModelBuilder.InputType;
 import spoon.compiler.Environment;
+import spoon.processing.Processor;
 import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.position.NoSourcePosition;
@@ -27,6 +30,7 @@ import spoon.reflect.factory.FactoryImpl;
 import spoon.support.DefaultCoreFactory;
 import spoon.support.StandardEnvironment;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
+
 
 /**
  * This class carries out all supporter task: e.g. creation of directories, copy
@@ -81,8 +85,13 @@ public class MutationSupporter {
 		if (classpath != null && classpath.length > 0) {
 			jdtSpoonModelBuilder.setSourceClasspath(classpath);
 		}
-		// MEMO: JDTBasedSpoonCompiler#process(Collection<Processor<? extends CtElement>> processors)
-		// をつかってここで、NormalizeProcessorを発動させるのも良い？
+		// JDTBasedSpoonCompiler#process(Collection<Processor<? extends CtElement>> processors)
+		// をつかってここで、NormalizeProcessorを発動させる
+		if (ConfigurationProperties.getProperty("mode").toLowerCase().equals("leven")) {
+			Collection<Processor<? extends CtElement>> processors = new ArrayList<>();
+			processors.add(new NormalizeProcessor());
+			jdtSpoonModelBuilder.process(processors);
+		}
 		jdtSpoonModelBuilder.build();
 
 		if (ConfigurationProperties.getPropertyBool("savespoonmodelondisk")) {

@@ -21,7 +21,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.approaches.levenshtein.LevenFacade;
-import fr.inria.astor.approaches.levenshtein.NormalizeProcessor;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -870,9 +869,6 @@ public abstract class AbstractMain {
 		launcher.getEnvironment().setComplianceLevel(ConfigurationProperties.getPropertyInt("javacompliancelevel"));
 		launcher.getEnvironment().setShouldCompile(true);
 		launcher.getEnvironment().setSourceClasspath(properties.getDependenciesString().split(File.pathSeparator));
-		if (ConfigurationProperties.getProperty("mode").toLowerCase().equals("leven")) {
-			launcher.addProcessor(new NormalizeProcessor());
-		}
 		launcher.buildModel();
 		// TODO: ここで正規化を行えば、変換前のASTモデルも扱える
 		launcher.getModelBuilder().generateProcessedSourceFiles(OutputType.COMPILATION_UNITS);
