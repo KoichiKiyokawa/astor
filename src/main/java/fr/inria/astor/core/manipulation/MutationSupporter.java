@@ -87,6 +87,7 @@ public class MutationSupporter {
 		}
 		// JDTBasedSpoonCompiler#process(Collection<Processor<? extends CtElement>> processors)
 		// をつかってここで、NormalizeProcessorを発動させる
+		// MEMO: ここで正規化すると、faultLocalizationに影響がでる。。。
 		if (ConfigurationProperties.getProperty("mode").toLowerCase().equals("leven")) {
 			Collection<Processor<? extends CtElement>> processors = new ArrayList<>();
 			processors.add(new NormalizeProcessor());

@@ -18,6 +18,16 @@ public class LevenFacade extends ProjectRepairFacade {
     super(properties);
   }
 
+
+  @Override
+  // もとはソースファイル1つに付き1回copyOriginalSourceCodeが走るようになっているが、
+  // 1つのプロジェクトにつき1回で十分なのでOverride
+  public void copyOriginalCodeToAstorWorkspace(String mutIdentifier) {
+    // ex) [/script/jGenProg_Defects4J_Chart_1/./source] -> /script/jGenProg_Defects4J_Chart_1/
+    String codeLocation = getProperties().getOriginalDirSrc().get(0).split("\\.")[0];
+    copyOriginalSourceCode(codeLocation, mutIdentifier);
+  }
+
   @Override
   public void copyOriginalSourceCode(String pathOriginalCode, String currentMutatorIdentifier) throws IOException {
     File destination = new File(getProperties().getWorkingDirForSource() + File.separator + currentMutatorIdentifier);
