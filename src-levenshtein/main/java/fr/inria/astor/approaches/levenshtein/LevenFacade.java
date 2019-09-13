@@ -25,7 +25,11 @@ public class LevenFacade extends ProjectRepairFacade {
   public void copyOriginalCodeToAstorWorkspace(String mutIdentifier) {
     // ex) [/script/jGenProg_Defects4J_Chart_1/./source] -> /script/jGenProg_Defects4J_Chart_1/
     String codeLocation = getProperties().getOriginalDirSrc().get(0).split("\\.")[0];
-    copyOriginalSourceCode(codeLocation, mutIdentifier);
+    try{
+      copyOriginalSourceCode(codeLocation, mutIdentifier);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
