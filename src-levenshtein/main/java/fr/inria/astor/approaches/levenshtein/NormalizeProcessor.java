@@ -8,15 +8,11 @@ import spoon.reflect.declaration.CtMethod;
 
 public class NormalizeProcessor extends AbstractProcessor<CtElement> {
   private int localVarIndex = 0;
-  private int methodIndex = 0;
 
   public void process(CtElement elem) {
     if (elem instanceof CtLocalVariable) {
       CtLocalVariable localVar = (CtLocalVariable) elem;
       Refactoring.changeLocalVariableName(localVar, "$" + this.localVarIndex++);
-    } else if (elem instanceof CtMethod) {
-      CtMethod method = (CtMethod) elem;
-      Refactoring.changeMethodName(method, "_" + this.methodIndex++);
     }
   }
 }
