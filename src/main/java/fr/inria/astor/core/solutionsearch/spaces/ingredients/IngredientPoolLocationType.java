@@ -11,10 +11,10 @@ import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.CacheList;
 
 /**
- * 
+ *
  * This class defines an implementation of IngredientPool, which groups
  * ingredients according to the content of the ingredient.
- * 
+ *
  * @author Matias Martinez
  */
 public abstract class IngredientPoolLocationType<Q, K, I, T, P> implements IngredientPool<Q, K, I, T> {
@@ -36,7 +36,7 @@ public abstract class IngredientPoolLocationType<Q, K, I, T, P> implements Ingre
 	}
 
 	/**
-	 * 
+	 *
 	 * @param processor
 	 *            processor such as @link{InvocationFixSpaceProcessor}
 	 * @throws JSAPException
@@ -47,7 +47,7 @@ public abstract class IngredientPoolLocationType<Q, K, I, T, P> implements Ingre
 	}
 
 	/**
-	 * 
+	 *
 	 * @param processors
 	 * @throws JSAPException
 	 */
@@ -62,7 +62,7 @@ public abstract class IngredientPoolLocationType<Q, K, I, T, P> implements Ingre
 
 	/**
 	 * The space maps an element to the location
-	 * 
+	 *
 	 * @param element
 	 * @return
 	 */
@@ -121,6 +121,12 @@ public abstract class IngredientPoolLocationType<Q, K, I, T, P> implements Ingre
 
 
 	@Override
+	/**
+	 * MEMO: Ingredientをとってくる実装
+	 * Q: CtElement 修正ポイントの型
+	 * K: String | CtElement ingredientの場所
+	 * I: Ingredient
+	 */
 	public List<I> getIngredients(Q location) {
 		K key = calculateLocation(location);
 		return getFixSpace().get(key);
