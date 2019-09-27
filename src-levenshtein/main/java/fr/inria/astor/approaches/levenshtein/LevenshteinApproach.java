@@ -17,6 +17,7 @@ import fr.inria.main.evolution.ExtensionPoints;
 import fr.inria.main.evolution.PlugInLoader;
 
 import fr.inria.astor.approaches.levenshtein.LevenSearchStrategy;
+import fr.inria.astor.approaches.levenshtein.NormalizeProcessor;
 
 public class LevenshteinApproach extends JGenProg {
   // とりまコンストラクタはそのまま
@@ -56,6 +57,7 @@ public class LevenshteinApproach extends JGenProg {
   @Override
   protected void loadIngredientPool() throws JSAPException, Exception {
     List<TargetElementProcessor<?>> ingredientProcessors = this.getTargetElementProcessors();
+    ingredientProcessors.add(new NormalizeProcessor());
     // 探索するスコープの設定（グローバル | 同じパッケージ内 | 同じファイル内）に応じてingredintSpaceを返す
     IngredientPool ingredientspace = LevenshteinApproach.getIngredientPool(ingredientProcessors);
 

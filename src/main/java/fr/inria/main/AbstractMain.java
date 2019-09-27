@@ -923,15 +923,8 @@ public abstract class AbstractMain {
 
 		properties.setDataFolder(ConfigurationProperties.getProperty("resourcesfolder"));
 
-		// LevenFacadeを無理やり発動させる
-		if (ConfigurationProperties.getProperty("mode").toLowerCase().equals("leven")) {
-			log.info("Use LevenFacade");
-			LevenFacade lFacade = new LevenFacade(properties);
-			return lFacade;
-		} else {
-			ProjectRepairFacade ce = new ProjectRepairFacade(properties);
-			return ce;
-		}
+		ProjectRepairFacade ce = new ProjectRepairFacade(properties);
+		return ce;
 	}
 
 	private List<String> determineBinFolder(String originalProjectRoot, String paramBinFolder) {
