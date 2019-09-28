@@ -9,7 +9,7 @@ import spoon.reflect.declaration.CtMethod;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 
 public class NormalizeProcessor extends TargetElementProcessor {
-  private int localVarIndex = 0;
+  private static int localVarIndex = 0;
 
   public void process(CtElement elem) {
     if (elem instanceof CtLocalVariable) {
