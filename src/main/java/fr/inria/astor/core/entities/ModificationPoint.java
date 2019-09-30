@@ -115,7 +115,8 @@ public class ModificationPoint implements Comparable {
 
 	public void setCommitMessage(String originalProjectRootDir) {
 		log.info("originalProjectRootDir: " + originalProjectRootDir);
-		setCommitMessageByGitBlame(originalProjectRootDir);
+		// setCommitMessageByGitBlame(originalProjectRootDir);
+		setCommitMessageByGitLogL(originalProjectRootDir);
 	}
 
 	private void setCommitMessageByGitBlame(String originalProjectRootDir) {
