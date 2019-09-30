@@ -2,6 +2,7 @@ package fr.inria.astor.approaches.levenshtein;
 
 import spoon.processing.AbstractProcessor;
 import spoon.refactoring.Refactoring;
+import spoon.refactoring.RefactoringException;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
@@ -14,7 +15,11 @@ public class NormalizeProcessor extends TargetElementProcessor {
   public void process(CtElement elem) {
     if (elem instanceof CtLocalVariable) {
       CtLocalVariable localVar = (CtLocalVariable) elem;
-      Refactoring.changeLocalVariableName(localVar, "$" + this.localVarIndex++);
+      try {
+        Refactoring.changeLocalVariableName(localVar, "$" + this.localVarIndex++);
+      } catch (RefactoringException e) {
+        e.printStackTrace();
+      }
     }
   }
 }
