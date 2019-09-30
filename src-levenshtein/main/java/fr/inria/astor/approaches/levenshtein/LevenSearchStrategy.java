@@ -18,6 +18,10 @@ import fr.inria.astor.util.StringUtil;
 
 import org.apache.lucene.search.spell.LevensteinDistance;
 
+import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.reflect.code.CtLocalVariable;
+import spoon.refactoring.Refactoring;
+
 public class LevenSearchStrategy extends IngredientSearchStrategy {
   private static final Boolean DESACTIVATE_CACHE = ConfigurationProperties
       .getPropertyBool("desactivateingredientcache");
@@ -32,6 +36,11 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   @Override
   public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
     int attemptsBaseIngredients = 0;
+    int varIndex = 0;
+    for (Object localVar : modificationPoint.getCodeElement().getElements(new TypeFilter(CtLocalVariable.class))) {
+      Refactoring.changeLocalVariableName((CtLocalVariable) localVar, "$" + varIndex++);
+      log.info("modif point: " + modificationPoint.getCodeElement().toString());
+    }
 
     List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
     for (Ingredient baseElem:baseElements){
