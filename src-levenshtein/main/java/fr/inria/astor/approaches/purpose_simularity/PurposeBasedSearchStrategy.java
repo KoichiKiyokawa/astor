@@ -41,6 +41,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 	@Override
 	public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
 		modificationPoint.setCommitMessage(this.originalProjectRootDir);
+		System.out.println("all metadata: " + modificationPoint.getCodeElement().getAllMetadata());
 
 		List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
 		for (Ingredient baseElem : baseElements) {
