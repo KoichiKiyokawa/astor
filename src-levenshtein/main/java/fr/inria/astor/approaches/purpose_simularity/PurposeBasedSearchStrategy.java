@@ -23,12 +23,14 @@ import fr.inria.astor.approaches.jgenprog.operators.ReplaceOp;
 // import org.nd4j.linalg.ops.transforms.Transforms;
 
 public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
+	private String javaFilePath;
 	public String originalProjectRootDir;
 
 	final private String modelFileName = "commit_message_model.txt";
 
-	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir) {
+	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir, String javaFilePath) {
 		super(space);
+		this.javaFilePath = javaFilePath;
 		this.originalProjectRootDir = originalProjectRootDir;
 	}
 
@@ -40,7 +42,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 	@Override
 	public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
-		modificationPoint.setCommitMessage(this.originalProjectRootDir);
+		modificationPoint.setCommitMessage(this.originalProjectRootDir, this.javaFilePath);
 
 		List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
 		for (Ingredient baseElem : baseElements) {

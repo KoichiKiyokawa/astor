@@ -1,6 +1,7 @@
 package fr.inria.astor.core.entities;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 
@@ -113,16 +114,16 @@ public class ModificationPoint implements Comparable {
 		return new ModificationPoint(identified, codeElement, ctClass, contextOfModificationPoint, this.generation);
 	}
 
-	public void setCommitMessage(String originalProjectRootDir) {
+	public void setCommitMessage(String originalProjectRootDir, String javaFilePath) {
 		log.info("originalProjectRootDir: " + originalProjectRootDir);
 		// setCommitMessageByGitBlame(originalProjectRootDir);
-		setCommitMessageByGitLogL(originalProjectRootDir);
+		setCommitMessageByGitLogL(originalProjectRootDir, javaFilePath);
 	}
 
 	private void setCommitMessageByGitBlame(String originalProjectRootDir) {
 		int lineNumber = this.getCodeElement().getPosition().getLine();
 		log.info("lineNumber: " + lineNumber);
-		String[] args = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber, getRelativeFilePath(originalProjectRootDir)).split("@");
+		String[] args = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber, _getRelativeFilePath(originalProjectRootDir)).split("@");
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		log.info("blame info made by cmd: " + res);
 
@@ -144,12 +145,14 @@ public class ModificationPoint implements Comparable {
 	}
 
 	// by `git log -L`
-	private void setCommitMessageByGitLogL(String originalProjectRootDir) {
+	private void setCommitMessageByGitLogL(String originalProjectRootDir, String javaFilePath) {
 		int lineNumber = this.getCodeElement().getPosition().getLine();
-		String [] args = { "git", "log", "-L", String.format("%d,%d:%s", lineNumber, lineNumber, getRelativeFilePath(originalProjectRootDir)) };
+		String[] args = { "git", "log", "-L",
+				String.format("%d,%d:%s", lineNumber, lineNumber, javaFilePath + "/" + getRelativeFilePath()) };
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		log.info("line number: " + lineNumber);
 		log.info("git result: " + res);
+		// TODO: 結果をパースする
 	}
 
 	private void setCommitMessageByGitLogS(String originalProjectRootDir) {
@@ -160,7 +163,7 @@ public class ModificationPoint implements Comparable {
 		// TODO: 結果をパースする
 	}
 
-	private String getRelativeFilePath(String originalProjectRootDir) {
+	private String _getRelativeFilePath(String originalProjectRootDir) {
 		log.info("code element: " + this.getCodeElement().toString()); // 83行目
 		log.info("Path: " + this.getCodeElement().getPath().toString()); // => File Path: #subPackage[name=org]#subPackage[name=apache]#subPackage[name=commons]#subPackage[name=math]#subPackage[name=distribution]#containedType[name=AbstractContinuousDistribution]#method[signature=inverseCumulativeProbability(double)]#body#statement[name=bracket]
 		String filename = this.getCodeElement().getPath().toString().split("containedType\\[name=")[1].split("]")[0];
@@ -172,5 +175,27 @@ public class ModificationPoint implements Comparable {
 				originalProjectRootDir));
 
 		return relativePath;
+	}
+
+	private String getRelativeFilePath() {
+		String rawPath = this.getCodeElement().getPath().toString();
+
+		List<String> paths = new ArrayList<>();
+		String fileName = "";
+
+		for (String str : rawPath.split("#")) {
+			if (str.startsWith("subPackage[name=")) {
+				paths.add(str.substring("subPackage[name=".length(), str.length() - 1));
+			}
+
+			if (str.startsWith("containedType[name=")) {
+				fileName = str.substring("containedType[name=".length(), str.length() - 1);
+			}
+		}
+
+		String res = String.format("%s/%s.java", String.join("/", paths), fileName);
+		log.info("get relative file path: " + res);
+
+		return res;
 	}
 }
