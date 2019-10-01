@@ -23,6 +23,9 @@ import spoon.reflect.code.CtLocalVariable;
 import spoon.refactoring.Refactoring;
 
 public class LevenSearchStrategy extends IngredientSearchStrategy {
+
+  private static int localVarIndex = 0;
+
   private static final Boolean DESACTIVATE_CACHE = ConfigurationProperties
       .getPropertyBool("desactivateingredientcache");
   protected Logger log = Logger.getLogger(this.getClass().getName());
@@ -36,9 +39,8 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   @Override
   public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
     int attemptsBaseIngredients = 0;
-    int varIndex = 0;
     for (Object localVar : modificationPoint.getCodeElement().getElements(new TypeFilter(CtLocalVariable.class))) {
-      Refactoring.changeLocalVariableName((CtLocalVariable) localVar, "$" + varIndex++);
+      Refactoring.changeLocalVariableName((CtLocalVariable) localVar, "$" + localVarIndex++);
       log.info("modif point: " + modificationPoint.getCodeElement().toString());
     }
 
