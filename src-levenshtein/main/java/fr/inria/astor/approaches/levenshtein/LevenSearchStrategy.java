@@ -41,13 +41,9 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     int attemptsBaseIngredients = 0;
     for (Object localVar : modificationPoint.getCodeElement().getElements(new TypeFilter(CtLocalVariable.class))) {
       Refactoring.changeLocalVariableName((CtLocalVariable) localVar, "$" + localVarIndex++);
-      log.info("modif point: " + modificationPoint.getCodeElement().toString());
     }
 
     List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
-    for (Ingredient baseElem:baseElements){
-      log.info("base elem: " + baseElem);
-    }
 
     /**
      * baseElementsをレーベンシュタイン距離に基づいて並び替える
