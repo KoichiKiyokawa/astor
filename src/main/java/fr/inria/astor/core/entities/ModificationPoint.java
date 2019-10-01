@@ -146,7 +146,7 @@ public class ModificationPoint implements Comparable {
 	// by `git log -L`
 	private void setCommitMessageByGitLogL(String originalProjectRootDir) {
 		int lineNumber = this.getCodeElement().getPosition().getLine();
-		String[] args = String.format("git@log@-L@%d,%d:%s", lineNumber, lineNumber, getFilePath(originalProjectRootDir)).split("@");
+		String [] args = { "git", "log", "-L", String.format("%d,%d:%s", lineNumber, lineNumber, getFilePath(originalProjectRootDir)) };
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		log.info("line number: " + lineNumber);
 		log.info("git result: " + res);
