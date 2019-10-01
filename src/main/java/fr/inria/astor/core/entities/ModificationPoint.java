@@ -122,7 +122,7 @@ public class ModificationPoint implements Comparable {
 	private void setCommitMessageByGitBlame(String originalProjectRootDir) {
 		int lineNumber = this.getCodeElement().getPosition().getLine();
 		log.info("lineNumber: " + lineNumber);
-		String[] args = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber, getFilePath(originalProjectRootDir)).split("@");
+		String[] args = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber, getRelativeFilePath(originalProjectRootDir)).split("@");
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		log.info("blame info made by cmd: " + res);
 
@@ -146,7 +146,7 @@ public class ModificationPoint implements Comparable {
 	// by `git log -L`
 	private void setCommitMessageByGitLogL(String originalProjectRootDir) {
 		int lineNumber = this.getCodeElement().getPosition().getLine();
-		String [] args = { "git", "log", "-L", String.format("%d,%d:%s", lineNumber, lineNumber, getFilePath(originalProjectRootDir)) };
+		String [] args = { "git", "log", "-L", String.format("%d,%d:%s", lineNumber, lineNumber, getRelativeFilePath(originalProjectRootDir)) };
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		log.info("line number: " + lineNumber);
 		log.info("git result: " + res);
@@ -160,17 +160,17 @@ public class ModificationPoint implements Comparable {
 		// TODO: 結果をパースする
 	}
 
-	private String getFilePath(String originalProjectRootDir) {
+	private String getRelativeFilePath(String originalProjectRootDir) {
 		log.info("code element: " + this.getCodeElement().toString()); // 83行目
 		log.info("Path: " + this.getCodeElement().getPath().toString()); // => File Path: #subPackage[name=org]#subPackage[name=apache]#subPackage[name=commons]#subPackage[name=math]#subPackage[name=distribution]#containedType[name=AbstractContinuousDistribution]#method[signature=inverseCumulativeProbability(double)]#body#statement[name=bracket]
 		String filename = this.getCodeElement().getPath().toString().split("containedType\\[name=")[1].split("]")[0];
 		log.info("filename: " + filename);
 		String[] args = String.format("git ls-files ./**/%s.java", filename).split(" ");
-		String res = CommandExecuter.run(args, originalProjectRootDir);
-		log.info("file path: " + res);
-		log.info("code: " + CommandExecuter.run(String.format("cat %s", originalProjectRootDir + res).split(" "),
+		String relativePath = CommandExecuter.run(args, originalProjectRootDir);
+		log.info("file path: " + relativePath);
+		log.info("code: " + CommandExecuter.run(String.format("cat %s", originalProjectRootDir + relativePath).split(" "),
 				originalProjectRootDir));
 
-		return originalProjectRootDir + res;
+		return relativePath;
 	}
 }
