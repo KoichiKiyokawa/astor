@@ -125,28 +125,6 @@ public class ModificationPoint implements Comparable {
 		// TODO: 結果をパースする
 	}
 
-	private void setCommitMessageByGitLogS(String originalProjectRootDir) {
-		String codeStr = this.getCodeElement().toString();
-		String[] args = String.format("git@log@-S@'%s'", codeStr).split("@");
-		String res = CommandExecuter.run(args, originalProjectRootDir);
-		log.info("git result: " + res);
-		// TODO: 結果をパースする
-	}
-
-	private String _getRelativeFilePath(String originalProjectRootDir) {
-		log.info("code element: " + this.getCodeElement().toString()); // 83行目
-		log.info("Path: " + this.getCodeElement().getPath().toString()); // => File Path: #subPackage[name=org]#subPackage[name=apache]#subPackage[name=commons]#subPackage[name=math]#subPackage[name=distribution]#containedType[name=AbstractContinuousDistribution]#method[signature=inverseCumulativeProbability(double)]#body#statement[name=bracket]
-		String filename = this.getCodeElement().getPath().toString().split("containedType\\[name=")[1].split("]")[0];
-		log.info("filename: " + filename);
-		String[] args = String.format("git ls-files ./**/%s.java", filename).split(" ");
-		String relativePath = CommandExecuter.run(args, originalProjectRootDir);
-		log.info("file path: " + relativePath);
-		log.info("code: " + CommandExecuter.run(String.format("cat %s", originalProjectRootDir + relativePath).split(" "),
-				originalProjectRootDir));
-
-		return relativePath;
-	}
-
 	private String getRelativeFilePath() {
 		String rawPath = this.getCodeElement().getPath().toString();
 
@@ -168,4 +146,17 @@ public class ModificationPoint implements Comparable {
 
 		return res;
 	}
+
+	private parseGitLogL(String gitLog) {
+		// Defects4jが余計なコミットを3つ追加することがあるので、直近4つ分のコミットを記録
+		List<String> commitSHAs = new ArrayList<>();
+		for (String line:gitLog.split("\n")) {
+			if (line.startWith("commit ")) {
+				commitSHAs.add(line.substring("commit ".length()));
+			}
+		}
+
+		
+	}
+
 }
