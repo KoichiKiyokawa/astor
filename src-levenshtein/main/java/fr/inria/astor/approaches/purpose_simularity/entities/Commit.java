@@ -17,16 +17,16 @@ public class Commit {
   }
 
   public String getMessage() {
-    String message = CommandExecuter.run(String.format("git log %s --oneline -1 --pretty=format:'%s'", SHA).split(" "),
-        originalProjectRootDir);
+    String[] args = { "git", "log", SHA, "--oneline", "-1", "--pretty=format:%s" };
+    String message = CommandExecuter.run(args, originalProjectRootDir);
     log.info("commit message: " + message);
 
     return message;
   }
 
   public String getAuthor() {
-    String author = CommandExecuter.run(String.format("git log %s --oneline -1 --pretty=format:'%an'", SHA).split(" "),
-        originalProjectRootDir);
+    String[] args = { "git", "log", SHA, "--oneline", "-1", "--pretty=format:%an" };
+    String author = CommandExecuter.run(args, originalProjectRootDir);
     log.info("commit author: " + author);
 
     return author;
