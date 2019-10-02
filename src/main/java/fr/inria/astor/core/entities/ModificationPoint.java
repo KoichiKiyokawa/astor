@@ -114,38 +114,8 @@ public class ModificationPoint implements Comparable {
 		return new ModificationPoint(identified, codeElement, ctClass, contextOfModificationPoint, this.generation);
 	}
 
-	public void setCommitMessage(String originalProjectRootDir, String javaFilePath) {
-		log.info("originalProjectRootDir: " + originalProjectRootDir);
-		// setCommitMessageByGitBlame(originalProjectRootDir);
-		setCommitMessageByGitLogL(originalProjectRootDir, javaFilePath);
-	}
-
-	private void setCommitMessageByGitBlame(String originalProjectRootDir) {
-		int lineNumber = this.getCodeElement().getPosition().getLine();
-		log.info("lineNumber: " + lineNumber);
-		String[] args = String.format("git@blame@-L@%d,%d@%s", lineNumber, lineNumber, _getRelativeFilePath(originalProjectRootDir)).split("@");
-		String res = CommandExecuter.run(args, originalProjectRootDir);
-		log.info("blame info made by cmd: " + res);
-
-		// try {
-		// 	Repository repo = new FileRepositoryBuilder().setGitDir(new File(originalProjectRootDir + ".git")).readEnvironment()
-		// 			.findGitDir().build();
-		// 	BlameResult blameResult = new Git(repo).blame().setFilePath(getFilePath(originalProjectRootDir)).call();
-		// 	if (blameResult == null) {
-		// 		log.info("blameResult is null");
-		// 	}
-		// 	RevCommit commit = blameResult.getSourceCommit(lineNumber - 1);
-		// 	if (commit == null) {
-		// 		log.info("commit is null");
-		// 	}
-		// 	log.info(commit.getFullMessage());
-		// } catch (IOException | GitAPIException e) {
-		// 	e.printStackTrace();
-		// }
-	}
-
 	// by `git log -L`
-	private void setCommitMessageByGitLogL(String originalProjectRootDir, String javaFilePath) {
+	private void setCommitMessage(String originalProjectRootDir, String javaFilePath) {
 		int lineNumber = this.getCodeElement().getPosition().getLine();
 		String[] args = { "git", "log", "-L",
 				String.format("%d,%d:%s", lineNumber, lineNumber, javaFilePath + "/" + getRelativeFilePath()) };
