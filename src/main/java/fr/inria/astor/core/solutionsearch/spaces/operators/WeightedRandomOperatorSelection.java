@@ -11,7 +11,7 @@ import fr.inria.astor.core.setup.ConfigurationProperties;
 
 /**
  * Weighted selection of operators
- * 
+ *
  * @author Matias Martinez
  *
  */
