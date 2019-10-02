@@ -44,6 +44,11 @@ public class Ingredient extends HasCommitMessage {
 		this.scope = scope;
 	}
 
+	@Override
+	public CtElement getCodeElement() {
+		return ingredientCode;
+	}
+
 	public CtElement getCode() {
 		return ingredientCode;
 	}
@@ -113,5 +118,5 @@ public class Ingredient extends HasCommitMessage {
 	public Map<String, Object> getMetadata() {
 		return metadata;
 	}
-	
+
 }
