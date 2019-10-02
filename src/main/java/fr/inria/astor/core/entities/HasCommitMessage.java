@@ -12,18 +12,18 @@ import fr.inria.astor.util.CommandExecuter;
 
 public abstract class HasCommitMessage {
 
-  private String originalProjectRootDir;
-  private String javaFilePath;
+	private String originalProjectRootDir;
+	private String javaFilePath;
 
-  public String commitMessage = "";
+	public String commitMessage = "";
 	protected Logger log = Logger.getLogger(this.getClass().getName());
 
-  public abstract CtElement getCodeElement();
+	public abstract CtElement getCodeElement();
 
-  // by `git log -L`
+	// by `git log -L`
 	public void setCommitMessage(String originalProjectRootDir, String javaFilePath) {
-    this.originalProjectRootDir = originalProjectRootDir;
-    this.javaFilePath = javaFilePath;
+		this.originalProjectRootDir = originalProjectRootDir;
+		this.javaFilePath = javaFilePath;
 
 		int lineNumber = this.getCodeElement().getPosition().getLine();
 		String[] args = { "git", "log", "-L",
@@ -31,10 +31,10 @@ public abstract class HasCommitMessage {
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		log.info("line number: " + lineNumber);
 		log.info("git result: " + res);
-		parseGitLogLAndSetCommitMessage();
-  }
+		parseGitLogLAndSetCommitMessage(res);
+	}
 
-  private String getRelativeFilePath() {
+	private String getRelativeFilePath() {
 		String rawPath = this.getCodeElement().getPath().toString();
 
 		List<String> paths = new ArrayList<>();
@@ -56,20 +56,21 @@ public abstract class HasCommitMessage {
 		return res;
 	}
 
-	private void parseGitLogLAndSetCommitMessageAndSetCommitMessage(String gitLog) {
+	private void parseGitLogLAndSetCommitMessage(String gitLog) {
 		// Defects4jが余計なコミットを3つ追加することがあるので、直近4つ分のコミットを記録
 		List<Commit> commits = new ArrayList<>();
-		for (String line:gitLog.split("\n")) {
+		for (String line : gitLog.split("\n")) {
 			if (line.startsWith("commit ")) {
-				String commitSHA =line.substring("commit ".length());
+				String commitSHA = line.substring("commit ".length());
 				commits.add(new Commit(commitSHA, this.originalProjectRootDir));
 			}
 		}
 
-		if (commits.get(0).isCommitedByDefects4j()){
-			this.commitMessage = comimts.get(3).getMessage();
-		}else{
+		if (commits.get(0).isCommitedByDefects4j()) {
+			this.commitMessage = commits.get(3).getMessage();
+		} else {
 			this.commitMessage = commits.get(0).getMessage();
 		}
+		log.info("commitMessage: " + this.commitMessage);
 	}
 }

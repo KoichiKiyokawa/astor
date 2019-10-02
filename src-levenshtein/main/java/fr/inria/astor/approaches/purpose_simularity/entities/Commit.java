@@ -1,5 +1,7 @@
 package fr.inria.astor.approaches.purpose_simularity.entities;
 
+import fr.inria.astor.util.CommandExecuter;
+
 public class Commit {
 
   private String SHA;
@@ -11,12 +13,12 @@ public class Commit {
   }
 
   public String getMessage() {
-    return CommandExecuter.run(String.format("git log %s --oneline -1 --pretty=format:'%s'", SHA),
+    return CommandExecuter.run(String.format("git log %s --oneline -1 --pretty=format:'%s'", SHA).split(" "),
         originalProjectRootDir);
   }
 
   public String getAuthor() {
-    return CommandExecuter.run(String.format("git log %s --oneline -1 --pretty=format:'%an'", SHA),
+    return CommandExecuter.run(String.format("git log %s --oneline -1 --pretty=format:'%an'", SHA).split(" "),
         originalProjectRootDir);
   }
 
