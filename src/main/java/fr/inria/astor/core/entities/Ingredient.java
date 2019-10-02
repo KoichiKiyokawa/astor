@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
+import fr.inria.astor.core.entities.HasCommitMessage;
+
 import spoon.reflect.declaration.CtElement;
 
 import fr.inria.astor.util.CommandExecuter;
@@ -14,7 +16,7 @@ import org.apache.log4j.Logger;
  * @author Matias Martinez matias.martinez@inria.fr
  *
  */
-public class Ingredient {
+public class Ingredient extends HasCommitMessage {
 
 	protected CtElement ingredientCode;
 	protected IngredientPoolScope scope;
@@ -23,10 +25,6 @@ public class Ingredient {
 	protected String cacheString = null;
 
 	protected Map<String, Object> metadata = new HashMap<>();
-
-	/** Added */
-	protected Logger log = Logger.getLogger(this.getClass().getName());
-	public String commitMessage = "";
 
 	public Ingredient(CtElement code, IngredientPoolScope scope, CtElement derivedFrom) {
 		super();
@@ -115,26 +113,5 @@ public class Ingredient {
 	public Map<String, Object> getMetadata() {
 		return metadata;
 	}
-
-	public void setCommitMessage(String originalProjectRootDir) {
-		// TOOD:
-	}
-
-	// public void setCommitMessageByGitLogS(String originalProjectRootDir) {
-	// 	String codeStr = this.toString();
-	// 	String[] args = String.format("git@log@-S@'%s'", codeStr).split("@");
-	// 	CommandExecuter.run(args, originalProjectRootDir);
-	// 	// TODO: 結果をパースする
-	// }
-
-	// public void setCommitMessageByGitLogL(String originalProjectRootDir) {
-	// 	int lineNumber = this.getCode().getPosition().getSourceStart();
-	// 	String[] args = String.format("git@log@-L@%d,%d:%s", lineNumber, lineNumber, getFilePath()).split("@");
-	// 	CommandExecuter.run(args, originalProjectRootDir);
-	// }
-
-	private String getFilePath() {
-		log.info("File Path: " + this.getCode().getPath().toString());
-		return this.getCode().getPath().toString();
-	}
+	
 }

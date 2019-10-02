@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
-
 public class CommandExecuter {
   /**
    * 指定したディレクトリに移動してから、コマンドを実行 Reference)
@@ -21,16 +19,12 @@ public class CommandExecuter {
    *
    */
   public static String run(String[] args, String relativePathForWorkingDirectory) {
-    Logger log = Logger.getLogger(CommandExecuter.class.getName());
     String LINE_SEPA = "\n";
     ProcessBuilder pb = new ProcessBuilder(args);
     // getInputStream()で結果が帰ってこないことがあったので、標準出力と標準エラーを混ぜる
     // https://qiita.com/shintaness/items/6dd91260726e555c49e5
     pb.redirectErrorStream(true);
     pb.directory(new File(relativePathForWorkingDirectory));
-
-    log.info("command: " + String.join(" ", pb.command()));
-    log.info("directory: " + pb.directory());
 
     try {
       Process p = pb.start();
