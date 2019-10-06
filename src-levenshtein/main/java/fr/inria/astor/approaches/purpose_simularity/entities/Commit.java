@@ -19,7 +19,6 @@ public class Commit {
   public String getMessage() {
     String[] args = { "git", "log", SHA, "--oneline", "-1", "--pretty=format:%s" };
     String message = CommandExecuter.run(args, originalProjectRootDir);
-    log.info("commit message: " + message);
 
     return message;
   }
@@ -27,7 +26,6 @@ public class Commit {
   public String getAuthor() {
     String[] args = { "git", "log", SHA, "--oneline", "-1", "--pretty=format:%an" };
     String author = CommandExecuter.run(args, originalProjectRootDir);
-    log.info("commit author: " + author);
 
     return author;
   }
