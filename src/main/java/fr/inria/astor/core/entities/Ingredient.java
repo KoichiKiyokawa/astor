@@ -9,7 +9,6 @@ import fr.inria.astor.core.entities.HasCommitMessage;
 import spoon.reflect.declaration.CtElement;
 
 import fr.inria.astor.util.CommandExecuter;
-import org.apache.log4j.Logger;
 
 /**
  *

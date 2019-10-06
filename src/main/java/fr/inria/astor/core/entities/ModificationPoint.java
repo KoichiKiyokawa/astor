@@ -59,6 +59,7 @@ public class ModificationPoint extends HasCommitMessage implements Comparable {
 		this.contextOfModificationPoint = contextOfGen;
 	}
 
+	@Override
 	public CtElement getCodeElement() {
 		return codeElement;
 	}

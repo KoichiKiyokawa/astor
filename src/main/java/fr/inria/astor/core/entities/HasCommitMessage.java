@@ -3,6 +3,7 @@ package fr.inria.astor.core.entities;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import spoon.reflect.declaration.CtElement;
 
 import fr.inria.astor.approaches.purpose_simularity.entities.Commit;
@@ -15,6 +16,8 @@ public abstract class HasCommitMessage {
 	public String commitMessage = "";
 
 	public abstract CtElement getCodeElement();
+
+	protected Logger log = Logger.getLogger(this.getClass().getName());
 
 	// by `git log -L`
 	public void setCommitMessage(String originalProjectRootDir, String javaFilePath) {
@@ -29,6 +32,7 @@ public abstract class HasCommitMessage {
 
 	private String getRelativeFilePath() {
 		String rawPath = this.getCodeElement().getPath().toString();
+		log.info("rawPath: " + rawPath);
 
 		List<String> paths = new ArrayList<>();
 		String fileName = "";
