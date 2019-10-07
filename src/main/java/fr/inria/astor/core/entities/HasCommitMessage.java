@@ -37,6 +37,7 @@ public abstract class HasCommitMessage {
 	}
 
 	private String getRelativeFilePath() throws CtPathException {
+		log.info("parent: " + this.getCodeElement().getParent(spoon.reflect.CtModelImpl.CtRootPackage.class));
 		String rawPath = this.getCodeElement().getPath().toString();
 		log.info("rawPath: " + rawPath);
 
