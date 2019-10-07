@@ -26,37 +26,38 @@ public abstract class HasCommitMessage {
 
 		log.info("code element: " + this.getCodeElement().toString());
 		int lineNumber = this.getCodeElement().getPosition().getLine();
-		try {
-			String[] args = { "git", "log", "-L",
-					String.format("%d,%d:%s", lineNumber, lineNumber, javaFilePath + "/" + getRelativeFilePath()) };
-			String res = CommandExecuter.run(args, originalProjectRootDir);
-			parseGitLogLAndSetCommitMessage(res);
-		} catch (CtPathException e) {
-			e.printStackTrace();
-			this.commitMessage = "";
-		}
+		String[] args = { "git", "log", "-L",
+				String.format("%d,%d:%s", lineNumber, lineNumber, javaFilePath + "/" + getRelativeFilePath()) };
+		String res = CommandExecuter.run(args, originalProjectRootDir);
+		parseGitLogLAndSetCommitMessage(res);
 	}
 
-	private String getRelativeFilePath() throws CtPathException {
-		log.info("parent: " + this.getCodeElement().getParent(spoon.reflect.CtModelImpl.CtRootPackage.class));
-		String rawPath = this.getCodeElement().getPath().toString();
-		log.info("rawPath: " + rawPath);
+	private String getRelativeFilePath() {
+		String res = "";
+		try {
+			String rawPath = this.getCodeElement().getPath().toString();
+			log.info("rawPath: " + rawPath);
 
-		List<String> paths = new ArrayList<>();
-		String fileName = "";
+			List<String> paths = new ArrayList<>();
+			String fileName = "";
 
-		for (String str : rawPath.split("#")) {
-			if (str.startsWith("subPackage[name=")) {
-				paths.add(str.substring("subPackage[name=".length(), str.length() - 1));
+			for (String str : rawPath.split("#")) {
+				if (str.startsWith("subPackage[name=")) {
+					paths.add(str.substring("subPackage[name=".length(), str.length() - 1));
+				}
+
+				if (str.startsWith("containedType[name=")) {
+					fileName = str.substring("containedType[name=".length(), str.length() - 1);
+				}
 			}
 
-			if (str.startsWith("containedType[name=")) {
-				fileName = str.substring("containedType[name=".length(), str.length() - 1);
-			}
+			res = String.format("%s/%s.java", String.join("/", paths), fileName);
+			log.info("formated path: " + res);
+
+		} catch (CtPathException e) {
+			e.printStackTrace();
+			log.error("cannot get path");
 		}
-
-		String res = String.format("%s/%s.java", String.join("/", paths), fileName);
-		log.info("formated path: " + res);
 
 		return res;
 	}
