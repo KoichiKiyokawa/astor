@@ -6,6 +6,8 @@ import java.util.List;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.setup.ConfigurationProperties;
@@ -26,6 +28,8 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 	private String javaFilePath;
 	public String originalProjectRootDir;
 
+	protected Logger log = Logger.getLogger(this.getClass().getName());
+
 	final private String modelFileName = "commit_message_model.txt";
 
 	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir, String javaFilePath) {
@@ -42,10 +46,12 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 	@Override
 	public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
+		log.info("set commit message to modificationPoint");
 		modificationPoint.setCommitMessage(this.originalProjectRootDir, this.javaFilePath);
 
 		List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
 		for (Ingredient baseElem : baseElements) {
+			log.info("set commit message to ingredient");
 			baseElem.setCommitMessage(this.originalProjectRootDir, this.javaFilePath);
 		}
 		// baseElementsをコミットメッセージに応じて並び替える
