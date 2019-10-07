@@ -62,9 +62,25 @@ public abstract class HasCommitMessage {
 		}
 
 		if (commits.get(0).isCommitedByDefects4j()) {
-			this.commitMessage = commits.get(3).getMessage();
+			Commit developerCommit = pickFirstDeveloperCommit(commits);
+			if (developerCommit == null) {
+				log.error("No developer message");
+				this.commitMessage = "";
+			} else {
+				this.commitMessage = developerCommit.getMessage();
+			}
 		} else {
 			this.commitMessage = commits.get(0).getMessage();
 		}
+	}
+
+	private Commit pickFirstDeveloperCommit(List<Commit> commits) {
+		for (Commit commit : commits) {
+			if (!commit.isCommitedByDefects4j()) {
+				return commit;
+			}
+		}
+
+		return null;
 	}
 }
