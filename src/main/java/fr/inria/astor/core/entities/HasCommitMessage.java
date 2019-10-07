@@ -48,6 +48,8 @@ public abstract class HasCommitMessage {
 		}
 
 		String res = String.format("%s/%s.java", String.join("/", paths), fileName);
+		log.info("formated path: " + res);
+
 		return res;
 	}
 
