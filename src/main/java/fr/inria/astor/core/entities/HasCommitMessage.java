@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.path.CtPathException;
 
 import fr.inria.astor.approaches.purpose_simularity.entities.Commit;
 import fr.inria.astor.util.CommandExecuter;
@@ -24,13 +25,18 @@ public abstract class HasCommitMessage {
 		this.originalProjectRootDir = originalProjectRootDir;
 
 		int lineNumber = this.getCodeElement().getPosition().getLine();
-		String[] args = { "git", "log", "-L",
-				String.format("%d,%d:%s", lineNumber, lineNumber, javaFilePath + "/" + getRelativeFilePath()) };
-		String res = CommandExecuter.run(args, originalProjectRootDir);
-		parseGitLogLAndSetCommitMessage(res);
+		try {
+			String[] args = { "git", "log", "-L",
+					String.format("%d,%d:%s", lineNumber, lineNumber, javaFilePath + "/" + getRelativeFilePath()) };
+			String res = CommandExecuter.run(args, originalProjectRootDir);
+			parseGitLogLAndSetCommitMessage(res);
+		} catch (CtPathException e) {
+			e.printStackTrace();
+			this.commitMessage = "";
+		}
 	}
 
-	private String getRelativeFilePath() {
+	private String getRelativeFilePath() throws CtPathException {
 		String rawPath = this.getCodeElement().getPath().toString();
 		log.info("rawPath: " + rawPath);
 
