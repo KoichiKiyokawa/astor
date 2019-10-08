@@ -46,7 +46,7 @@ public abstract class HasCommitMessage {
 		}
 
 		if (commits.get(0).isCommitedByDefects4j()) {
-			Commit developerCommit = pickFirstDeveloperCommit(commits);
+			Commit developerCommit = pickDeveloperBugCommit(commits);
 			if (developerCommit == null) {
 				log.error("No developer message");
 				this.commitMessage = "";
@@ -58,10 +58,19 @@ public abstract class HasCommitMessage {
 		}
 	}
 
-	private Commit pickFirstDeveloperCommit(List<Commit> commits) {
+	// バグが混じったときのコミットを取得する
+	private Commit pickDeveloperBugCommit(List<Commit> commits) {
+		// バグ修正コミットの一つ前に該当箇所を変更しているコミットがあったら、
+		// そのコミットがバグが混じった原因となるコミット
+		boolean existFixCommit = false;
+
 		for (Commit commit : commits) {
-			if (!commit.isCommitedByDefects4j()) {
+			if (existFixCommit) {
 				return commit;
+			}
+
+			if (!commit.isCommitedByDefects4j()) {
+				existFixCommit = true;
 			}
 		}
 
