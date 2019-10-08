@@ -23,8 +23,6 @@ public abstract class HasCommitMessage {
 	// by `git log -L`
 	public void setCommitMessage(String originalProjectRootDir, String javaFilePath) {
 		this.originalProjectRootDir = originalProjectRootDir;
-
-		log.info("code element: " + this.getCodeElement().toString());
 		int lineNumber = this.getCodeElement().getPosition().getLine();
 		String[] args = { "git", "log", "-L",
 				String.format("%d,%d:%s", lineNumber, lineNumber, getRelativeFilePath()) };
