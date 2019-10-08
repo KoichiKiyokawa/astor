@@ -27,39 +27,14 @@ public abstract class HasCommitMessage {
 		log.info("code element: " + this.getCodeElement().toString());
 		int lineNumber = this.getCodeElement().getPosition().getLine();
 		String[] args = { "git", "log", "-L",
-				String.format("%d,%d:%s", lineNumber, lineNumber, javaFilePath + "/" + getRelativeFilePath()) };
+				String.format("%d,%d:%s", lineNumber, lineNumber, getRelativeFilePath()) };
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		parseGitLogLAndSetCommitMessage(res);
+		log.info("commit message: " + this.commitMessage);
 	}
 
 	private String getRelativeFilePath() {
-		String res = "";
-		try {
-			String rawPath = this.getCodeElement().getPath().toString();
-			log.info("rawPath: " + rawPath);
-
-			List<String> paths = new ArrayList<>();
-			String fileName = "";
-
-			for (String str : rawPath.split("#")) {
-				if (str.startsWith("subPackage[name=")) {
-					paths.add(str.substring("subPackage[name=".length(), str.length() - 1));
-				}
-
-				if (str.startsWith("containedType[name=")) {
-					fileName = str.substring("containedType[name=".length(), str.length() - 1);
-				}
-			}
-
-			res = String.format("%s/%s.java", String.join("/", paths), fileName);
-			log.info("formated path: " + res);
-
-		} catch (CtPathException e) {
-			e.printStackTrace();
-			log.error("cannot get path");
-		}
-
-		return res;
+		return this.getCodeElement().getPosition().getFile().toString();
 	}
 
 	private void parseGitLogLAndSetCommitMessage(String gitLog) {
