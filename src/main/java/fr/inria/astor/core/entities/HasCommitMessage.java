@@ -28,7 +28,6 @@ public abstract class HasCommitMessage {
 				String.format("%d,%d:%s", lineNumber, lineNumber, getRelativeFilePath()) };
 		String res = CommandExecuter.run(args, originalProjectRootDir);
 		parseGitLogLAndSetCommitMessage(res);
-		log.info("commit message: " + this.commitMessage);
 	}
 
 	private String getRelativeFilePath() {
