@@ -65,6 +65,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 			Collections.sort(baseElements, new Comparator<Ingredient>() {
 				@Override
 				public int compare(Ingredient ingredientA, Ingredient ingredientB) {
+					log.info(String.format("modif: %s, ingA: %s, ingB: %s", modificationPoint.commitMessage, ingredientA.commitMessage, ingredientB.commitMessage));
 					INDArray vecIngredientA_CommitMessage = vec.inferVector(ingredientA.commitMessage);
 					INDArray vecIngredientB_CommitMessage = vec.inferVector(ingredientB.commitMessage);
 					INDArray vecModificationPointCommitMessage = vec.inferVector(modificationPoint.commitMessage);
