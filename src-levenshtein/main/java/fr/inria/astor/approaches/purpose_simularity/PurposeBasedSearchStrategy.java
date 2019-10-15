@@ -54,11 +54,11 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 		}
 		// baseElementsをコミットメッセージに応じて並び替える
 		try {
-      ParagraphVectors vec = WordVectorSerializer.readParagraphVectors(getSavedModelFile());
-      TokenizerFactory t = new DefaultTokenizerFactory();
-      t.setTokenPreProcessor(new CommonPreprocessor());
-      vec.setTokenizerFactory(t);
-      // コサイン類似度を測定
+			ParagraphVectors vec = WordVectorSerializer.readParagraphVectors(getSavedModelFile());
+			TokenizerFactory t = new DefaultTokenizerFactory();
+			t.setTokenPreProcessor(new CommonPreprocessor());
+			vec.setTokenizerFactory(t);
+			// コサイン類似度を測定
 			// caution! モデルの中に存在していない文章は無理
 			Collections.sort(baseElements, new Comparator<Ingredient>() {
 				@Override
@@ -67,42 +67,45 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 					INDArray vecIngredientB_CommitMessage = vec.inferVector(ingredientB.commitMessage);
 					INDArray vecModificationPointCommitMessage = vec.inferVector(modificationPoint.commitMessage);
 					double simA2modif = Transforms.cosineSim(vecIngredientA_CommitMessage, vecModificationPointCommitMessage);
-					log.info(String.format("modif: %s, ingA: %s, sim: %f", modificationPoint.commitMessage, ingredientA.commitMessage, simA2modif));
+					log.info(String.format("modif: {code: %s, commit: %s}, ingA: {code: %s,commit: %s}, sim: %f",
+							modificationPoint.getCodeElement(), modificationPoint.commitMessage, ingredientA.getCodeElement(),
+							ingredientA.commitMessage, simA2modif));
 
 					double simB2modif = Transforms.cosineSim(vecIngredientB_CommitMessage, vecModificationPointCommitMessage);
-					log.info(String.format("modif: %s, ingA: %s, sim: %f", modificationPoint.commitMessage, ingredientB.commitMessage, simB2modif));
+					log.info(String.format("modif: {code: %s, commit: %s}, ingA: {code: %s,commit: %s}, sim: %f",
+							modificationPoint.getCodeElement(), modificationPoint.commitMessage, ingredientB.getCodeElement(),
+							ingredientB.commitMessage, simB2modif));
 
 					return Double.compare(simA2modif, simB2modif);
 				}
 			});
 			// end sort
 
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		return null;
 	}
 
 	/**
-   * ingredientのリストを探索範囲からとってくる
-   */
-  public List<Ingredient> getIngredientsFromSpace(ModificationPoint modificationPoint, AstorOperator operationType) {
+	 * ingredientのリストを探索範囲からとってくる
+	 */
+	public List<Ingredient> getIngredientsFromSpace(ModificationPoint modificationPoint, AstorOperator operationType) {
 
-    String type = null;
-    if (operationType instanceof ReplaceOp) {
-      type = modificationPoint.getCodeElement().getClass().getSimpleName();
-    }
+		String type = null;
+		if (operationType instanceof ReplaceOp) {
+			type = modificationPoint.getCodeElement().getClass().getSimpleName();
+		}
 
-    List<Ingredient> elements = null;
-    if (type == null) {
-      elements = this.ingredientSpace.getIngredients(modificationPoint.getCodeElement());
+		List<Ingredient> elements = null;
+		if (type == null) {
+			elements = this.ingredientSpace.getIngredients(modificationPoint.getCodeElement());
 
-    } else {
-      elements = this.ingredientSpace.getIngredients(modificationPoint.getCodeElement(), type);
-    }
+		} else {
+			elements = this.ingredientSpace.getIngredients(modificationPoint.getCodeElement(), type);
+		}
 
-    return elements;
-  }
+		return elements;
+	}
 }
