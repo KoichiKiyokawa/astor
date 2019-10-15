@@ -25,8 +25,11 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
 public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
+
 	private String javaFilePath;
 	public String originalProjectRootDir;
+	
+	private List<CtElement> locationsAnalyzed = new ArrayList<>();
 
 	protected Logger log = Logger.getLogger(this.getClass().getName());
 
@@ -44,17 +47,24 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 		return new File(String.format("/astor/models/%s/%s", id, modelFileName));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
+
 		modificationPoint.setCommitMessage(this.originalProjectRootDir, this.javaFilePath);
 
 		List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
-		for (Ingredient baseElem : baseElements) {
-			baseElem.setCommitMessage(this.originalProjectRootDir, this.javaFilePath);
-		}
-		// baseElementsをコミットメッセージに応じて並び替える
 
-		Collections.sort(baseElements, new Comparator<Ingredient>() {
+		if (baseElements == null || baseElements.isEmpty()) {
+			return null;
+		}
+
+		// We store the location to avoid sorting the ingredient twice.
+		if (!locationsAnalyzed.contains(modificationPoint.getCodeElement())) {
+			locationsAnalyzed.add(modificationPoint.getCodeElement());
+
+			// We have never analyze this location, let's sort the ingredients.
+			Collections.sort(baseElements, new Comparator<Ingredient>() {
 			@Override
 			public int compare(Ingredient ingredientA, Ingredient ingredientB) {
 
@@ -110,45 +120,19 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 				return 1; // default: no sort
 			}
 		});
-		// end sort
+			// end sort
 
-		if (baseElements == null || baseElements.isEmpty()) {
-			log.debug("Any element available for mp " + modificationPoint);
-			return null;
+			// We reintroduce the sorted list ingredient into the space
+			this.ingredientSpace.setIngredients(modificationPoint.getCodeElement(), baseElements);
 		}
-
-		int elementsFromFixSpaceCount = baseElements.size();
-		log.debug("Templates availables" + elementsFromFixSpaceCount);
-
-		Stats.currentStat.getIngredientsStats().addSize(Stats.currentStat.getIngredientsStats().ingredientSpaceSize,
-				baseElements.size());
-
-		while (attemptsBaseIngredients < elementsFromFixSpaceCount) {
-
-			log.debug(
-					String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients, elementsFromFixSpaceCount));
-
-			Ingredient baseIngredient = baseElements.get(attemptsBaseIngredients);
-			attemptsBaseIngredients++;
-
-			String newingredientkey = getKey(modificationPoint, operationType);
-
-			if (baseIngredient != null && baseIngredient.getCode() != null) {
-
-				// check if the element was already used
-				if (DESACTIVATE_CACHE || !this.cache.containsKey(newingredientkey)
-						|| !this.cache.get(newingredientkey).contains(baseIngredient.getChacheCodeString())) {
-					this.cache.add(newingredientkey, baseIngredient.getChacheCodeString());
-					return baseIngredient;
-				}
-
-			}
-
-		} // End while
-
-		log.debug("--- no mutation left to apply in element "
-				+ StringUtil.trunc(modificationPoint.getCodeElement().getShortRepresentation()) + ", search space size: "
-				+ elementsFromFixSpaceCount);
+		int size = baseElements.size();
+		if (size > 0) {
+			// We get the smaller element
+			CtElement element = baseElements.get(0).getCode();
+			// we remove it from space
+			baseElements.remove(0);
+			return new Ingredient(element, this.ingredientSpace.spaceScope());
+		} // any ingredient
 		return null;
 	}
 
