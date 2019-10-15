@@ -110,10 +110,46 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 				return 1; // default: no sort
 			}
 		});
-	// end sort
+		// end sort
 
-	return null;
+		if (baseElements == null || baseElements.isEmpty()) {
+			log.debug("Any element available for mp " + modificationPoint);
+			return null;
+		}
 
+		int elementsFromFixSpaceCount = baseElements.size();
+		log.debug("Templates availables" + elementsFromFixSpaceCount);
+
+		Stats.currentStat.getIngredientsStats().addSize(Stats.currentStat.getIngredientsStats().ingredientSpaceSize,
+				baseElements.size());
+
+		while (attemptsBaseIngredients < elementsFromFixSpaceCount) {
+
+			log.debug(
+					String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients, elementsFromFixSpaceCount));
+
+			Ingredient baseIngredient = baseElements.get(attemptsBaseIngredients);
+			attemptsBaseIngredients++;
+
+			String newingredientkey = getKey(modificationPoint, operationType);
+
+			if (baseIngredient != null && baseIngredient.getCode() != null) {
+
+				// check if the element was already used
+				if (DESACTIVATE_CACHE || !this.cache.containsKey(newingredientkey)
+						|| !this.cache.get(newingredientkey).contains(baseIngredient.getChacheCodeString())) {
+					this.cache.add(newingredientkey, baseIngredient.getChacheCodeString());
+					return baseIngredient;
+				}
+
+			}
+
+		} // End while
+
+		log.debug("--- no mutation left to apply in element "
+				+ StringUtil.trunc(modificationPoint.getCodeElement().getShortRepresentation()) + ", search space size: "
+				+ elementsFromFixSpaceCount);
+		return null;
 	}
 
 	/**
