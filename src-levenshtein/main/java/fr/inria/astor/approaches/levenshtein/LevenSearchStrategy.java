@@ -26,102 +26,54 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
   private static int localVarIndex = 0;
 
-  private static final Boolean DESACTIVATE_CACHE = ConfigurationProperties
-      .getPropertyBool("desactivateingredientcache");
-  protected Logger log = Logger.getLogger(this.getClass().getName());
+  private List<CtElement> locationsAnalyzed = new ArrayList<>();
 
-  public MapList<String, String> cache = new MapList<>();
+  protected Logger log = Logger.getLogger(this.getClass().getName());
 
   public LevenSearchStrategy(IngredientPool space) {
     super(space);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
-    int attemptsBaseIngredients = 0;
-    for (Object localVar : modificationPoint.getCodeElement().getElements(new TypeFilter(CtLocalVariable.class))) {
-      Refactoring.changeLocalVariableName((CtLocalVariable) localVar, "$" + localVarIndex++);
-    }
 
     List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
 
-    /**
-     * baseElementsをレーベンシュタイン距離に基づいて並び替える
-     */
-    // start sort
-    LevensteinDistance lDis = new LevensteinDistance();
-    String modifCode = modificationPoint.getCodeElement().toString(); // 修正対象のソースコード
-    Collections.sort(baseElements, new Comparator<Ingredient>() {
-      @Override
-      public int compare(Ingredient ingredientA, Ingredient ingredientB) {
-        return Float.compare(lDis.getDistance(ingredientA.getCode().toString(), modifCode),
-            lDis.getDistance(ingredientB.getCode().toString(), modifCode));
-      }
-    });
-    // end sort
-
     if (baseElements == null || baseElements.isEmpty()) {
-      log.debug("Any element available for mp " + modificationPoint);
       return null;
     }
 
-    int elementsFromFixSpaceCount = baseElements.size();
-    log.debug("Templates availables" + elementsFromFixSpaceCount);
+    // We store the location to avoid sorting the ingredient twice.
+    if (!locationsAnalyzed.contains(modificationPoint.getCodeElement())) {
+      locationsAnalyzed.add(modificationPoint.getCodeElement());
 
-    Stats.currentStat.getIngredientsStats().addSize(Stats.currentStat.getIngredientsStats().ingredientSpaceSize,
-        baseElements.size());
-
-    while (attemptsBaseIngredients < elementsFromFixSpaceCount) {
-
-      log.debug(
-          String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients, elementsFromFixSpaceCount));
-
-      Ingredient baseIngredient = baseElements.get(attemptsBaseIngredients);
-      attemptsBaseIngredients++;
-
-      String newingredientkey = getKey(modificationPoint, operationType);
-
-      if (baseIngredient != null && baseIngredient.getCode() != null) {
-
-        // check if the element was already used
-        if (DESACTIVATE_CACHE || !this.cache.containsKey(newingredientkey)
-            || !this.cache.get(newingredientkey).contains(baseIngredient.getChacheCodeString())) {
-          this.cache.add(newingredientkey, baseIngredient.getChacheCodeString());
-          return baseIngredient;
+      // We have never analyze this location, let's sort the ingredients.
+      LevensteinDistance lDis = new LevensteinDistance();
+      String modifCode = modificationPoint.getCodeElement().toString();
+      Collections.sort(baseElements, new Comparator<Ingredient>() {
+        @Override
+        public int compare(Ingredient ingredientA, Ingredient ingredientB) {
+          return Float.compare(lDis.getDistance(ingredientA.getCode().toString(), modifCode),
+              lDis.getDistance(ingredientB.getCode().toString(), modifCode));
         }
+      });
+      // end sort
 
-      }
+      // We reintroduce the sorted list ingredient into the space
+      this.ingredientSpace.setIngredients(modificationPoint.getCodeElement(), baseElements);
+    }
 
-    } // End while
-
-    log.debug("--- no mutation left to apply in element "
-        + StringUtil.trunc(modificationPoint.getCodeElement().getShortRepresentation()) + ", search space size: "
-        + elementsFromFixSpaceCount);
+    int size = baseElements.size();
+    if (size > 0) {
+      // We get the smaller element
+      CtElement element = baseElements.get(0).getCode();
+      // we remove it from space
+      baseElements.remove(0);
+      return new Ingredient(element, this.ingredientSpace.spaceScope());
+    } // any ingredient
     return null;
   }
-
-  public String getKey(ModificationPoint modPoint, AstorOperator operator) {
-    String lockey = modPoint.getCodeElement().getPosition().toString() + "-" + modPoint.getCodeElement() + "-"
-        + operator.toString();
-    return lockey;
-  }
-
-  /**
-   * ランダムではなく、レーベンシュタイン距離に基づいて返す fixSpaceを並び替える
-   *
-   * @param fixSpace
-   * @return
-   */
-  // protected Ingredient getStatementFromSpace(List<Ingredient> fixSpace,
-  // ModificationPoint modificationPoint) {
-  // LevensteinDistance lDis = new LevensteinDistance();
-  // log.debug(modificationPoint.getCodeElement());
-  // String modifCode = modificationPoint.getCodeElement().toString();
-  // fixSpace.stream().sorted((ingredientA, ingredientB) ->
-  // lDis.getDistance(ingredientA.getCode().toString, modifCode)
-  // - lDis.getDistance(ingredientB.getCode().toString, modifCode));
-  // return null;
-  // }
 
   /**
    * ingredientのリストを探索範囲からとってくる
