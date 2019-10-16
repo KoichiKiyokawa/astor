@@ -1,5 +1,6 @@
 package fr.inria.astor.approaches.purpose_simularity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+
+import spoon.reflect.declaration.CtElement;
 
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;

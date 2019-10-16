@@ -1,9 +1,17 @@
 package fr.inria.astor.approaches.levenshtein;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 import java.util.Comparator;
+
 import org.apache.log4j.Logger;
+import org.apache.lucene.search.spell.LevensteinDistance;
+
+import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.reflect.code.CtLocalVariable;
+import spoon.refactoring.Refactoring;
+import spoon.reflect.declaration.CtElement;
 
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
@@ -15,12 +23,6 @@ import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.approaches.jgenprog.operators.ReplaceOp;
 import fr.inria.astor.util.MapList;
 import fr.inria.astor.util.StringUtil;
-
-import org.apache.lucene.search.spell.LevensteinDistance;
-
-import spoon.reflect.visitor.filter.TypeFilter;
-import spoon.reflect.code.CtLocalVariable;
-import spoon.refactoring.Refactoring;
 
 public class LevenSearchStrategy extends IngredientSearchStrategy {
 
