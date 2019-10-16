@@ -28,7 +28,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 	private String javaFilePath;
 	public String originalProjectRootDir;
-	
+
 	private List<CtElement> locationsAnalyzed = new ArrayList<>();
 
 	protected Logger log = Logger.getLogger(this.getClass().getName());
@@ -128,10 +128,10 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 		int size = baseElements.size();
 		if (size > 0) {
 			// We get the smaller element
-			CtElement element = baseElements.get(0).getCode();
+			Ingredient ingredient = baseElements.get(0).getCode();
 			// we remove it from space
 			baseElements.remove(0);
-			return new Ingredient(element, this.ingredientSpace.spaceScope());
+			return ingredient;
 		} // any ingredient
 		return null;
 	}
