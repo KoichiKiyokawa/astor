@@ -30,7 +30,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
   private List<CtElement> locationsAnalyzed = new ArrayList<>();
 
-  protected Logger log = Logger.getLogger(this.getClass().getName());
+  protected jdk.internal.instrumentation.Logger log = Logger.getLogger(this.getClass().getName());
 
   public LevenSearchStrategy(IngredientPool space) {
     super(space);
@@ -63,6 +63,10 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       // end sort
 
       // We reintroduce the sorted list ingredient into the space
+      log.info("modif code: " + modificationPoint.getCodeElement().toString());
+      baseElements.forEach(elem -> {
+        log.info("baseElement: " + elem.getCodeElement().toString());
+      });
       this.ingredientSpace.setIngredients(modificationPoint.getCodeElement(), baseElements);
     }
 
