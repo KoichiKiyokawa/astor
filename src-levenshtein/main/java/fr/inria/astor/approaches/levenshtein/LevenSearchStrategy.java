@@ -30,7 +30,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
   private List<CtElement> locationsAnalyzed = new ArrayList<>();
 
-  protected jdk.internal.instrumentation.Logger log = Logger.getLogger(this.getClass().getName());
+  protected Logger log = Logger.getLogger(this.getClass().getName());
 
   public LevenSearchStrategy(IngredientPool space) {
     super(space);
