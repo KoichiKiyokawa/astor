@@ -69,7 +69,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     int size = baseElements.size();
     if (size > 0) {
       // We get the smaller element
-      Ingredient ingredient = baseElements.get(0).getCode();
+      Ingredient ingredient = baseElements.get(0);
       // we remove it from space
       baseElements.remove(0);
       return ingredient;
