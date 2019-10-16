@@ -56,7 +56,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
-          return Float.compare(lDis.getDistance(ingredientA.getCode().toString(), modifCode),
+          return -1 * Float.compare(lDis.getDistance(ingredientA.getCode().toString(), modifCode),
               lDis.getDistance(ingredientB.getCode().toString(), modifCode));
         }
       });

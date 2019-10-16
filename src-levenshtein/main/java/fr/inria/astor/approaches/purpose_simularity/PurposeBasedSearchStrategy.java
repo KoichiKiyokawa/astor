@@ -76,19 +76,19 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 					if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
 						// ingredientAもingredientBもmodificationPointと同じコミットメッセージだったら、
 						// とりあえず並び替えずにそのまま
-						return 1;
+						return 0;
 					} else {
 						// modificationPointとingredientAのコミットメッセージが同じ かつ
 						// modificationPointとingredientBのコミットメッセージが違う とき、
 						// ingredientAをうしろに
-						return -1;
+						return 1;
 					}
 				} else {
 					if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
 						// modificationPointとingredientAのコミットメッセージが違う かつ
 						// modificationPointとingredientBのコミットメッセージが同じ とき、
 						// そのまま
-						return 1;
+						return 0;
 					}
 				}
 
@@ -115,12 +115,12 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 							modificationPoint.getCodeElement(), modificationPoint.commitMessage, ingredientB.getCodeElement(),
 							ingredientB.commitMessage, simB2modif));
 
-					return Double.compare(simA2modif, simB2modif);
+					return -1 * Double.compare(simA2modif, simB2modif);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
-				return 1; // default: no sort
+				return 0; // default: no sort
 			}
 		});
 			// end sort
