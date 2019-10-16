@@ -71,6 +71,11 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 				@Override
 				public int compare(Ingredient ingredientA, Ingredient ingredientB) {
 
+					if (ingredientA.commitMessage.length() == 0) {
+						// ingredientAのコミットメッセージが空だったら、うしろに
+						return 1;
+					}
+
 					// 同じコミットメッセージのものは優先して使わない
 					if (modificationPoint.commitMessage.equals(ingredientA.commitMessage)) {
 						if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
