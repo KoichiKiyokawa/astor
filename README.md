@@ -3,7 +3,7 @@
 This project is an extension of [Astor](https://hal.archives-ouvertes.fr/hal-01321615/document)
 
 ## How to run
-1. You have to install [Docker](https://docs.docker.com).
+1. You have to install [Docker](https://docs.docker.com) and [Maven](https://maven.apache.org).
 
 2. You have to pull image of Astor.
 ```
