@@ -1,9 +1,11 @@
 package fr.inria.astor.approaches.levenshtein;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.LevensteinDistance;
@@ -26,9 +28,11 @@ import fr.inria.astor.util.StringUtil;
 
 public class LevenSearchStrategy extends IngredientSearchStrategy {
 
-  private static int localVarIndex = 0;
-
   private List<CtElement> locationsAnalyzed = new ArrayList<>();
+
+  // <正規化前の要素, 正規化後の要素>
+  // 同じ要素を複数回正規化しないように
+  private Map<CtElement, CtElement> raw2normalized = new HashMap<>();
 
   protected Logger log = Logger.getLogger(this.getClass().getName());
 
@@ -41,6 +45,8 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
 
     List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
+    CtElement normalizedModif = getNormalizedElement(modificationPoint.getCodeElement());
+    baseElements.forEach(baseElem -> getNormalizedElement((CtElement) baseElem));
 
     if (baseElements == null || baseElements.isEmpty()) {
       return null;
@@ -52,12 +58,13 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
       // We have never analyze this location, let's sort the ingredients.
       LevensteinDistance lDis = new LevensteinDistance();
-      String modifCode = modificationPoint.getCodeElement().toString();
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
-          return -1 * Float.compare(lDis.getDistance(ingredientA.getCode().toString(), modifCode),
-              lDis.getDistance(ingredientB.getCode().toString(), modifCode));
+          return -1 * Float.compare(
+            lDis.getDistance(raw2normalized.get(ingredientA).toString(), normalizedModif.toString()),
+            lDis.getDistance(raw2normalized.get(ingredientB).toString(), normalizedModif.toString())
+          );
         }
       });
       // end sort
@@ -100,5 +107,23 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     }
 
     return elements;
+  }
+
+  private CtElement getNormalizedElement(CtElement rawElem) {
+    List<CtElement> normalizedElements = new ArrayList<>(raw2normalized.keySet());
+    if (normalizedElements.contains(rawElem)) {
+      // 既に正規化済みであればその値を返す
+      return raw2normalized.get(rawElem);
+    } else {
+      int localVarIndex = 0;
+      CtElement normalized = rawElem.clone();
+      for (CtLocalVariable localVar : normalized.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
+        Refactoring.changeLocalVariableName(localVar, "$" + localVarIndex++);
+      }
+
+      log.info("normalized: " + normalized);
+      raw2normalized.put(rawElem, normalized);
+      return normalized;
+    }
   }
 }

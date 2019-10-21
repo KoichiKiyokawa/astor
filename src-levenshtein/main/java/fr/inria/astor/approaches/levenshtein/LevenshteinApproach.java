@@ -57,7 +57,6 @@ public class LevenshteinApproach extends JGenProg {
   @Override
   protected void loadIngredientPool() throws JSAPException, Exception {
     List<TargetElementProcessor<?>> ingredientProcessors = this.getTargetElementProcessors();
-    ingredientProcessors.add(new NormalizeProcessor());
     // 探索するスコープの設定（グローバル | 同じパッケージ内 | 同じファイル内）に応じてingredintSpaceを返す
     IngredientPool ingredientspace = LevenshteinApproach.getIngredientPool(ingredientProcessors);
 
