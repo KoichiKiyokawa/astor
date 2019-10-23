@@ -118,6 +118,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       int localVarIndex = 0;
       CtElement normalized = rawElem.clone();
       for (CtLocalVariable localVar : normalized.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
+        log.info("localVar: " + localVar);
         Refactoring.changeLocalVariableName(localVar, "$" + localVarIndex++);
       }
 
