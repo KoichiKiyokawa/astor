@@ -46,7 +46,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
     List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
     CtElement normalizedModif = getNormalizedElement(modificationPoint.getCodeElement());
-    baseElements.forEach(baseElem -> getNormalizedElement((CtElement) baseElem));
+    baseElements.forEach(baseElem -> getNormalizedElement((CtElement) baseElem.getCodeElement()));
 
     if (baseElements == null || baseElements.isEmpty()) {
       return null;
@@ -62,8 +62,8 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
           return -1 * Float.compare(
-            lDis.getDistance(raw2normalized.get(ingredientA.toString()).toString(), normalizedModif.toString()),
-            lDis.getDistance(raw2normalized.get(ingredientB.toString()).toString(), normalizedModif.toString())
+            lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(), normalizedModif.toString()),
+            lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(), normalizedModif.toString())
           );
         }
       });
