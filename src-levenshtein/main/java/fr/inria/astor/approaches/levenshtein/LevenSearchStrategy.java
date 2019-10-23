@@ -32,7 +32,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
   // <正規化前の要素, 正規化後の要素>
   // 同じ要素を複数回正規化しないように
-  private Map<CtElement, CtElement> raw2normalized = new HashMap<>();
+  private Map<String, CtElement> raw2normalized = new HashMap<>();
 
   protected Logger log = Logger.getLogger(this.getClass().getName());
 
@@ -62,8 +62,8 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
           return -1 * Float.compare(
-            lDis.getDistance(raw2normalized.get(ingredientA).toString(), normalizedModif.toString()),
-            lDis.getDistance(raw2normalized.get(ingredientB).toString(), normalizedModif.toString())
+            lDis.getDistance(raw2normalized.get(ingredientA.toString()).toString(), normalizedModif.toString()),
+            lDis.getDistance(raw2normalized.get(ingredientB.toString()).toString(), normalizedModif.toString())
           );
         }
       });
@@ -110,21 +110,23 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   }
 
   private CtElement getNormalizedElement(CtElement rawElem) {
-    List<CtElement> normalizedElements = new ArrayList<>(raw2normalized.keySet());
-    if (normalizedElements.contains(rawElem)) {
+    List<String> normalizedElements = new ArrayList<>(raw2normalized.keySet());
+    if (normalizedElements.contains(rawElem.toString())) {
       // 既に正規化済みであればその値を返す
-      return raw2normalized.get(rawElem);
+      return raw2normalized.get(rawElem.toString());
     } else {
       int localVarIndex = 0;
-      CtElement normalized = rawElem.clone();
-      for (CtLocalVariable localVar : normalized.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
+      String rawStr = rawElem.toString();
+      for (CtLocalVariable localVar : rawElem.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
         log.info("localVar: " + localVar);
         Refactoring.changeLocalVariableName(localVar, "$" + localVarIndex++);
       }
 
-      log.info("normalized: " + normalized);
-      raw2normalized.put(rawElem, normalized);
-      return normalized;
+      // log.info("normalized: " + normalized);
+      // raw2normalized.put(rawElem, normalized);
+      log.info("normalized: " + rawElem);
+      raw2normalized.put(rawStr, rawElem);
+      return rawElem;
     }
   }
 }
