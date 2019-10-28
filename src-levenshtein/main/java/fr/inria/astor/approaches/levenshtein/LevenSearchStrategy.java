@@ -70,10 +70,6 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       // end sort
 
       // We reintroduce the sorted list ingredient into the space
-      log.info("modif code: " + modificationPoint.getCodeElement().toString());
-      baseElements.forEach(elem -> {
-        log.info("baseElement: " + elem.getCodeElement().toString());
-      });
       this.ingredientSpace.setIngredients(modificationPoint.getCodeElement(), baseElements);
     }
 
@@ -118,13 +114,9 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       int localVarIndex = 0;
       String rawStr = rawElem.toString();
       for (CtLocalVariable localVar : rawElem.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
-        log.info("localVar: " + localVar);
         Refactoring.changeLocalVariableName(localVar, "$" + localVarIndex++);
       }
 
-      // log.info("normalized: " + normalized);
-      // raw2normalized.put(rawElem, normalized);
-      log.info("normalized: " + rawElem);
       raw2normalized.put(rawStr, rawElem);
       return rawElem;
     }
