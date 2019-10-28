@@ -45,12 +45,12 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   public Ingredient getFixIngredient(ModificationPoint modificationPoint, AstorOperator operationType) {
 
     List<Ingredient> baseElements = getIngredientsFromSpace(modificationPoint, operationType);
-    CtElement normalizedModif = getNormalizedElement(modificationPoint.getCodeElement());
-    baseElements.forEach(baseElem -> getNormalizedElement((CtElement) baseElem.getCodeElement()));
-
     if (baseElements == null || baseElements.isEmpty()) {
       return null;
     }
+
+    CtElement normalizedModif = getNormalizedElement(modificationPoint.getCodeElement());
+    baseElements.forEach(baseElem -> getNormalizedElement((CtElement) baseElem.getCodeElement()));
 
     // We store the location to avoid sorting the ingredient twice.
     if (!locationsAnalyzed.contains(modificationPoint.getCodeElement())) {
