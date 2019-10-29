@@ -54,6 +54,10 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       getNormalizedElement(baseElem.getCode());
     }
 
+    for(Map.Entry<String, CtElement> entry : raw2normalized.entrySet()){
+      System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+  }
+
     // We store the location to avoid sorting the ingredient twice.
     if (!locationsAnalyzed.contains(modificationPoint.getCodeElement())) {
       locationsAnalyzed.add(modificationPoint.getCodeElement());
@@ -63,8 +67,10 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
-          if (!raw2normalized.containsKey(ingredientA.getCode().toString())
-              || !raw2normalized.containsKey(ingredientB.getCode().toString())) {
+          if (!raw2normalized.containsKey(ingredientA.getCode().toString())) {
+            return 0;
+          }
+          if (!raw2normalized.containsKey(ingredientB.getCode().toString())) {
             return 0;
           }
           return -1 * Float.compare(
