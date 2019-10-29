@@ -14,7 +14,7 @@ import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.refactoring.Refactoring;
 import spoon.reflect.declaration.CtElement;
-
+import fr.inria.astor.core.entities.HasCommitMessage;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.setup.ConfigurationProperties;
@@ -50,7 +50,9 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     }
 
     CtElement normalizedModif = getNormalizedElement(modificationPoint.getCodeElement());
-    baseElements.forEach(baseElem -> getNormalizedElement((CtElement) baseElem.getCodeElement()));
+    for (Ingredient baseElem : baseElements) {
+      getNormalizedElement(baseElem.getCode());
+    }
 
     // We store the location to avoid sorting the ingredient twice.
     if (!locationsAnalyzed.contains(modificationPoint.getCodeElement())) {
@@ -62,9 +64,10 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
           return -1 * Float.compare(
-            lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(), normalizedModif.toString()),
-            lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(), normalizedModif.toString())
-          );
+              lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(),
+                  normalizedModif.toString()),
+              lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(),
+                  normalizedModif.toString()));
         }
       });
       // end sort
