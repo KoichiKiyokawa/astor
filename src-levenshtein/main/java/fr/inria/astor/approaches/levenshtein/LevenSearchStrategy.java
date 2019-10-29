@@ -54,9 +54,9 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       getNormalizedElement(baseElem.getCode());
     }
 
-    for(Map.Entry<String, CtElement> entry : raw2normalized.entrySet()){
+    for (Map.Entry<String, CtElement> entry : raw2normalized.entrySet()) {
       System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-  }
+    }
 
     // We store the location to avoid sorting the ingredient twice.
     if (!locationsAnalyzed.contains(modificationPoint.getCodeElement())) {
@@ -127,7 +127,11 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       int localVarIndex = 0;
       String rawStr = rawElem.toString();
       for (CtLocalVariable localVar : rawElem.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
-        Refactoring.changeLocalVariableName(localVar, "$" + localVarIndex++);
+        try{
+          Refactoring.changeLocalVariableName(localVar, "$" + localVarIndex++);
+        }catch(RefactoringExeption e){
+          e.printStackTrace();
+        }
       }
 
       raw2normalized.put(rawStr, rawElem);
