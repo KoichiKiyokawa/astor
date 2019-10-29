@@ -14,11 +14,9 @@ import fr.inria.astor.core.manipulation.bytecode.OutputWritter;
 import fr.inria.astor.core.manipulation.sourcecode.ROOTTYPE;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
-
 import spoon.OutputType;
 import spoon.SpoonModelBuilder.InputType;
 import spoon.compiler.Environment;
-import spoon.processing.Processor;
 import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.position.NoSourcePosition;
