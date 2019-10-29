@@ -13,7 +13,11 @@ import org.apache.lucene.search.spell.LevensteinDistance;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.refactoring.Refactoring;
+import spoon.refactoring.RefactoringException;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtMethod;
+
 import fr.inria.astor.core.entities.HasCommitMessage;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
@@ -33,6 +37,10 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   // <正規化前の要素, 正規化後の要素>
   // 同じ要素を複数回正規化しないように
   private Map<String, CtElement> raw2normalized = new HashMap<>();
+
+  // 変数名を正規化する際に、同じスコープ内で同じ変数名にならないように
+  // <親クラス名#親メソッド名, 最後に割り振ったindex>
+  private Map<String, Integer> scope2lastIndex = new HashMap<>();
 
   protected Logger log = Logger.getLogger(this.getClass().getName());
 
@@ -54,8 +62,10 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       getNormalizedElement(baseElem.getCode());
     }
 
+    // log TODO: delete
     for (Map.Entry<String, CtElement> entry : raw2normalized.entrySet()) {
-      System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+      log.info(entry.getKey() + ":" + entry.getValue().toString());
+      log.info("----------------------");
     }
 
     // We store the location to avoid sorting the ingredient twice.
@@ -118,23 +128,48 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     return elements;
   }
 
+  private String getClassAndMethodName(CtElement elem) {
+    String parentClassName = elem.getParent(CtClass.class).getSimpleName();
+    String parentMethodName = elem.getParent(CtMethod.class).getSimpleName();
+    String classAndMethodName = parentClassName + "#" + parentMethodName;
+    log.info("classAndMethodName: " + classAndMethodName);
+
+    return classAndMethodName;
+  }
+
+  private int getLastIndex(CtElement elem) {
+    String classAndMethodName = getClassAndMethodName(elem);
+
+    if (scope2lastIndex.containsKey(classAndMethodName)) {
+      return scope2lastIndex.get(classAndMethodName);
+    } else {
+      scope2lastIndex.put(classAndMethodName, 0);
+      return 0;
+    }
+  }
+
   private CtElement getNormalizedElement(CtElement rawElem) {
     List<String> normalizedElements = new ArrayList<>(raw2normalized.keySet());
     if (normalizedElements.contains(rawElem.toString())) {
       // 既に正規化済みであればその値を返す
       return raw2normalized.get(rawElem.toString());
     } else {
-      int localVarIndex = 0;
+      int localVarIndex = getLastIndex(rawElem);
       String rawStr = rawElem.toString();
       for (CtLocalVariable localVar : rawElem.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
-        try{
+        try {
           Refactoring.changeLocalVariableName(localVar, "$" + localVarIndex++);
-        }catch(RefactoringExeption e){
+        } catch (RefactoringException e) {
           e.printStackTrace();
         }
       }
 
+      // 最後に割り振ったindexを更新
+      scope2lastIndex.put(getClassAndMethodName(rawElem), localVarIndex);
+
+      // 正規化済みのコードを更新
       raw2normalized.put(rawStr, rawElem);
+
       return rawElem;
     }
   }
