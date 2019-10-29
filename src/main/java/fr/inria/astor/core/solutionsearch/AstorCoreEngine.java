@@ -26,7 +26,7 @@ import fr.inria.astor.core.entities.OperatorInstance;
 import fr.inria.astor.core.entities.PatchDiff;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.entities.SuspiciousModificationPoint;
-import fr.inria.astor.core.entities.VariantValidationResult;
+import fr.inria.astor.core.entities.validation.VariantValidationResult;
 import fr.inria.astor.core.faultlocalization.FaultLocalizationStrategy;
 import fr.inria.astor.core.faultlocalization.cocospoon.CocoFaultLocalization;
 import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
@@ -68,7 +68,7 @@ import fr.inria.astor.core.stats.PatchStat.PatchStatEnum;
 import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.core.stats.Stats.GeneralStatEnum;
 import fr.inria.astor.core.validation.ProgramVariantValidator;
-import fr.inria.astor.core.validation.processbased.ProcessValidator;
+import fr.inria.astor.core.validation.junit.JUnitProcessValidator;
 import fr.inria.astor.util.PatchDiffCalculator;
 import fr.inria.astor.util.TimeUtil;
 import fr.inria.main.AstorOutputStatus;
@@ -175,37 +175,37 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		currentStat.getGeneralStats().put(GeneralStatEnum.EXECUTION_IDENTIFIER,
 				ConfigurationProperties.getProperty("projectIdentifier"));
 
-		try {
-			this.computePatchDiff(this.solutions);
-		} catch (Exception e) {
-			log.error("Problem at computing diff" + e);
-		}
-		this.sortPatches();
 		this.printFinalStatus();
 
-		log.info(this.getSolutionData(this.solutions, this.generationsExecuted) + "\n");
-
-		// Recreate statistiques of patches
-		if (!solutions.isEmpty()) {
-			patchInfo = createStatsForPatches(solutions, generationsExecuted, dateInitEvolution);
-		}
-
-		String output = this.projectFacade.getProperties().getWorkingDirRoot();
-
-		// Reporting results
-		for (ReportResults out : this.getOutputResults()) {
-			out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
-		}
-
-		if (ConfigurationProperties.getPropertyBool("removeworkingfolder")) {
-			File fout = new File(output);
-
+		if (this.solutions.size() > 0) {
+			this.sortPatches();
 			try {
-				FileUtils.deleteDirectory(fout);
-			} catch (IOException e) {
-				e.printStackTrace();
-				log.error(e);
+
+				this.computePatchDiff(this.solutions);
+
+			} catch (Exception e) {
+				log.error("Problem at computing diff" + e);
 			}
+			log.info(this.getSolutionData(this.solutions, this.generationsExecuted) + "\n");
+
+			patchInfo = createStatsForPatches(solutions, generationsExecuted, dateInitEvolution);
+
+			// Reporting results
+			String output = this.projectFacade.getProperties().getWorkingDirRoot();
+			for (ReportResults out : this.getOutputResults()) {
+				out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
+				if (ConfigurationProperties.getPropertyBool("removeworkingfolder")) {
+					File fout = new File(output);
+
+					try {
+						FileUtils.deleteDirectory(fout);
+					} catch (IOException e) {
+						e.printStackTrace();
+						log.error(e);
+					}
+				}
+			}
+
 		}
 
 	}
@@ -246,15 +246,15 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	public void printFinalStatus() {
 		log.info("\n----SUMMARY_EXECUTION---");
 		if (!this.solutions.isEmpty()) {
-			log.debug("End Repair Loops: Found solution");
-			log.debug("Solution stored at: " + projectFacade.getProperties().getWorkingDirForSource());
+			log.info("End Repair Search: Found solution");
+			log.info("Solution stored at: " + projectFacade.getProperties().getWorkingDirForSource());
+			log.debug("\nNumber solutions:" + this.solutions.size());
+			for (ProgramVariant variant : solutions) {
+				log.debug("f (sol): " + variant.getFitness() + ", " + variant);
+			}
 
 		} else {
-			log.debug("End Repair Loops: NOT Found solution");
-		}
-		log.debug("\nNumber solutions:" + this.solutions.size());
-		for (ProgramVariant variant : solutions) {
-			log.debug("f (sol): " + variant.getFitness() + ", " + variant);
+			log.info("End Repair Search: NOT Found solution");
 		}
 		log.debug("\nAll variants:");
 		for (ProgramVariant variant : variants) {
@@ -774,65 +774,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 			}
 		}
 
-		String codeLocation = "";
-		if (ConfigurationProperties.getPropertyBool("parsesourcefromoriginal")) {
-			List<String> codeLocations = projectFacade.getProperties().getOriginalDirSrc();
+		this.mutatorSupporter.buildSpoonModel(this.projectFacade);
 
-			if (ConfigurationProperties.getPropertyBool("includeTestInSusp")
-					&& projectFacade.getProperties().getTestDirSrc().size() > 0) {
-				codeLocations.addAll(projectFacade.getProperties().getTestDirSrc());
-			}
-
-			for (String source : codeLocations) {
-				codeLocation += source + File.pathSeparator;
-			}
-			if (codeLocation.length() > 0) {
-				codeLocation = codeLocation.substring(0, codeLocation.length() - 1);
-			}
-		} else {
-			codeLocation = projectFacade.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
-		}
-
-		String bytecodeLocation = projectFacade.getOutDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
-		String classpath = projectFacade.getProperties().getDependenciesString();
-		String[] cpArray = (classpath != null && !classpath.trim().isEmpty()) ? classpath.split(File.pathSeparator)
-				: null;
-
-		log.info("Creating model,  Code location from working folder: " + codeLocation);
-
-		try {
-
-			mutatorSupporter.buildModel(codeLocation, bytecodeLocation, cpArray);
-			log.debug("Spoon Model built from location: " + codeLocation);
-		} catch (Exception e) {
-			log.error("Problem compiling the model with compliance level "
-					+ ConfigurationProperties.getPropertyInt("javacompliancelevel"));
-			log.error(e.getMessage());
-			e.printStackTrace();
-			try {
-				mutatorSupporter.cleanFactory();
-				log.info("Recompiling with compliance level "
-						+ ConfigurationProperties.getPropertyInt("alternativecompliancelevel"));
-				mutatorSupporter.getFactory().getEnvironment()
-						.setComplianceLevel(ConfigurationProperties.getPropertyInt("alternativecompliancelevel"));
-				mutatorSupporter.buildModel(codeLocation, bytecodeLocation, cpArray);
-
-			} catch (Exception e2) {
-				e2.printStackTrace();
-				log.error("Error compiling: " + e2.getMessage());
-				if (!ConfigurationProperties.getPropertyBool("continuewhenmodelfail")) {
-					log.error("Astor does not continue when model build fails");
-					throw e2;
-				} else {
-
-					log.error("Astor continues when model build fails. Classes created: "
-							+ mutatorSupporter.getFactory().Type().getAll().size());
-
-				}
-
-			}
-
-		}
 		log.info("Number of CtTypes created: " + mutatorSupporter.getFactory().Type().getAll().size());
 
 		///// ONCE ASTOR HAS BUILT THE MODEL,
@@ -1138,7 +1081,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		} else
 		// if validation is different to default (process)
 		if (validationArgument.equals("process") || validationArgument.equals("test-suite")) {
-			ProcessValidator validator = new ProcessValidator();
+			JUnitProcessValidator validator = new JUnitProcessValidator();
 			this.setProgramValidator(validator);
 		} else {
 			this.setProgramValidator((ProgramVariantValidator) PlugInLoader.loadPlugin(ExtensionPoints.VALIDATION));
@@ -1351,6 +1294,23 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		this.loadOperatorSelectorStrategy();
 		this.loadSolutionPrioritization();
 		this.loadOutputResults();
+
+	}
+
+	/**
+	 * Finds the test cases to run and stores them in the project facade.
+	 * 
+	 * @return
+	 */
+	public List<String> resolveTestsToRun() {
+
+		List<String> testCasesFound = this.programValidator.findTestCasesToExecute(projectFacade);
+
+		projectFacade.getProperties().setRegressionCases(testCasesFound);
+
+		log.info("Test retrieved from classes: " + testCasesFound.size());
+		log.debug("Test retrieved from classes: " + testCasesFound);
+		return testCasesFound;
 
 	}
 
