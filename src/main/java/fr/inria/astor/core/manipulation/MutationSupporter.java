@@ -13,7 +13,6 @@ import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.manipulation.bytecode.OutputWritter;
 import fr.inria.astor.core.manipulation.sourcecode.ROOTTYPE;
 import fr.inria.astor.core.setup.ConfigurationProperties;
-import fr.inria.astor.approaches.levenshtein.NormalizeProcessor;
 
 import spoon.OutputType;
 import spoon.SpoonModelBuilder.InputType;

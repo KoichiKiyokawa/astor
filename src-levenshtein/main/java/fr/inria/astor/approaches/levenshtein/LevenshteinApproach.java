@@ -17,7 +17,6 @@ import fr.inria.main.evolution.ExtensionPoints;
 import fr.inria.main.evolution.PlugInLoader;
 
 import fr.inria.astor.approaches.levenshtein.LevenSearchStrategy;
-import fr.inria.astor.approaches.levenshtein.NormalizeProcessor;
 
 public class LevenshteinApproach extends JGenProg {
   // とりまコンストラクタはそのまま
