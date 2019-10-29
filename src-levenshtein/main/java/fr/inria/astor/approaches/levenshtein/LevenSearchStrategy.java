@@ -77,12 +77,6 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
-          if (!raw2normalized.containsKey(ingredientA.getCode().toString())) {
-            return 0;
-          }
-          if (!raw2normalized.containsKey(ingredientB.getCode().toString())) {
-            return 0;
-          }
           return -1 * Float.compare(
               lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(),
                   normalizedModif.toString()),
