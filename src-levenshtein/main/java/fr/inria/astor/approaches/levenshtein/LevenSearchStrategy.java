@@ -122,22 +122,29 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     return elements;
   }
 
-  private String getClassAndMethodName(CtElement elem) {
-    String parentClassName = elem.getParent(CtClass.class).getSimpleName();
-    String parentMethodName = elem.getParent(CtMethod.class).getSimpleName();
-    String classAndMethodName = parentClassName + "#" + parentMethodName;
-    log.info("classAndMethodName: " + classAndMethodName);
+  private String getScopeID(CtElement elem) {
+    CtClass parentClass = elem.getParent(CtClass.class);
+    CtMethod parentMethod = elem.getParent(CtMethod.class);
 
-    return classAndMethodName;
+    String scopeID = "";
+    if (parentClass != null && parentMethod != null) {
+      scopeID= parentClass.getSimpleName() +"#"+parentMethod.getSimpleName();
+    } else if (parentMethod == null) {
+      scopeID = parentClass.getSimpleName();
+    }
+
+    log.info("scopeID: " + scopeID);
+
+    return scopeID;
   }
 
   private int getLastIndex(CtElement elem) {
-    String classAndMethodName = getClassAndMethodName(elem);
+    String scopeID = getScopeID(elem);
 
-    if (scope2lastIndex.containsKey(classAndMethodName)) {
-      return scope2lastIndex.get(classAndMethodName);
+    if (scope2lastIndex.containsKey(scopeID)) {
+      return scope2lastIndex.get(scopeID);
     } else {
-      scope2lastIndex.put(classAndMethodName, 0);
+      scope2lastIndex.put(scopeID, 0);
       return 0;
     }
   }
@@ -159,7 +166,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       }
 
       // 最後に割り振ったindexを更新
-      scope2lastIndex.put(getClassAndMethodName(rawElem), localVarIndex);
+      scope2lastIndex.put(getScopeID(rawElem), localVarIndex);
 
       // 正規化済みのコードを更新
       raw2normalized.put(rawStr, rawElem);
