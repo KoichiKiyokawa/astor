@@ -34,3 +34,6 @@ examples/
 
 # docs
 html/
+
+# models used in PurposeBased
+models/
