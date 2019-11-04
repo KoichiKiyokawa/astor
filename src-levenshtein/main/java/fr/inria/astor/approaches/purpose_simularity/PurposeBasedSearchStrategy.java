@@ -36,8 +36,6 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 	protected Logger log = Logger.getLogger(this.getClass().getName());
 
-	final private String modelFileName = "commit_message_model.txt";
-
 	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir, String javaFilePath) {
 		super(space);
 		this.javaFilePath = javaFilePath;
@@ -47,7 +45,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 	private File getSavedModelFile() {
 		// ex) Math-2 -> math
 		String id = ConfigurationProperties.getProperty("projectIdentifier").split("-")[0].toLowerCase();
-		return new File(String.format("/astor/models/%s/%s", id, modelFileName));
+		return new File(String.format("models/%s.txt", id));
 	}
 
 	@SuppressWarnings("unchecked")
