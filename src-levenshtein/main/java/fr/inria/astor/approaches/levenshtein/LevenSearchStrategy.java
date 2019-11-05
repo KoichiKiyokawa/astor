@@ -77,6 +77,10 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
+          if (ingredientA == null || ingredientB == null) {
+            return 1;
+          }
+
           return -1 * Float.compare(
               lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(),
                   normalizedModif.toString()),
@@ -128,7 +132,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
     String scopeID = "";
     if (parentClass != null && parentMethod != null) {
-      scopeID= parentClass.getSimpleName() +"#"+parentMethod.getSimpleName();
+      scopeID = parentClass.getSimpleName() + "#" + parentMethod.getSimpleName();
     } else if (parentMethod == null) {
       scopeID = parentClass.getSimpleName();
     }
