@@ -77,15 +77,15 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
-          if (ingredientA == null || ingredientB == null) {
+          try {
+            return -1 * Float.compare(
+                lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(),
+                    normalizedModif.toString()),
+                lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(),
+                    normalizedModif.toString()));
+          } catch (NullPointerException e) {
             return 1;
           }
-
-          return -1 * Float.compare(
-              lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(),
-                  normalizedModif.toString()),
-              lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(),
-                  normalizedModif.toString()));
         }
       });
       // end sort
