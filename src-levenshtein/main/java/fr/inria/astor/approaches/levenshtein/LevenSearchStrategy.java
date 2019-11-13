@@ -36,7 +36,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
   // <正規化前の要素, 正規化後の要素>
   // 同じ要素を複数回正規化しないように
-  private Map<CtElement, CtElement> raw2normalized = new HashMap<>();
+  private Map<String, CtElement> raw2normalized = new HashMap<>();
 
   // 変数名を正規化する際に、同じスコープ内で同じ変数名にならないように
   // <親クラス名#親メソッド名, 最後に割り振ったindex>
@@ -63,7 +63,8 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     }
 
     // log TODO: delete
-    for (Map.Entry<CtElement, CtElement> entry : raw2normalized.entrySet()) {
+    log.info("Normalized Elements");
+    for (Map.Entry<String, CtElement> entry : raw2normalized.entrySet()) {
       log.info(entry.getKey() + ":" + entry.getValue().toString());
       log.info("----------------------");
     }
@@ -77,12 +78,11 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
+          log.info(String.format("IngredientA: {}, IngredientB: {}", ingredientA.getCode(), ingredientB.getCode()));
           try {
             return -1 * Float.compare(
-                lDis.getDistance(raw2normalized.get(ingredientA.getCode()).toString(),
-                    normalizedModif.toString()),
-                lDis.getDistance(raw2normalized.get(ingredientB.getCode()).toString(),
-                    normalizedModif.toString()));
+                lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(), normalizedModif.toString()),
+                lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(), normalizedModif.toString()));
           } catch (NullPointerException e) {
             return 1;
           }
@@ -153,29 +153,23 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     }
   }
 
-  private CtElement getNormalizedElement(CtElement rawElem) {
-    List<CtElement> normalizedElements = new ArrayList<>(raw2normalized.keySet());
-    if (normalizedElements.contains(rawElem.toString())) {
-      // 既に正規化済みであればその値を返す
-      return raw2normalized.get(rawElem.toString());
-    } else {
-      int localVarIndex = getLastIndex(rawElem);
-      CtElement changedElem = rawElem.clone();
-      for (CtLocalVariable localVar : changedElem.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
-        try {
-          new CtRenameLocalVariableRefactoring().setTarget(localVar).setNewName("$" + localVarIndex++).refactor();
-        } catch (RefactoringException e) {
-          e.printStackTrace();
-        }
+  private CtElement getNormalizedElement(CtElement elem) {
+    int localVarIndex = getLastIndex(elem);
+    String rawElem = elem.toString();
+    for (CtLocalVariable localVar : elem.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
+      try {
+        new CtRenameLocalVariableRefactoring().setTarget(localVar).setNewName("$" + localVarIndex++).refactor();
+      } catch (RefactoringException e) {
+        e.printStackTrace();
       }
-
-      // 最後に割り振ったindexを更新
-      scope2lastIndex.put(getScopeID(rawElem), localVarIndex);
-
-      // 正規化済みのコードを更新
-      raw2normalized.put(rawElem, changedElem);
-
-      return rawElem;
     }
+
+    // 最後に割り振ったindexを更新
+    scope2lastIndex.put(getScopeID(elem), localVarIndex);
+
+    // 正規化済みのコードを更新
+    raw2normalized.put(rawElem, elem);
+
+    return elem;
   }
 }
