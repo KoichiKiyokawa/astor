@@ -11,8 +11,8 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.LevensteinDistance;
 
 import spoon.reflect.visitor.filter.TypeFilter;
-import spoon.reflect.code.CtLocalVariable;
-import spoon.refactoring.CtRenameLocalVariableRefactoring;
+import spoon.reflect.declaration.CtVariable;
+import spoon.refactoring.CtRenameGenericVariableRefactoring;
 import spoon.refactoring.RefactoringException;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtClass;
@@ -78,14 +78,12 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
-          log.info(String.format("IngredientA: {}, IngredientB: {}", ingredientA.getCode(), ingredientB.getCode()));
-          try {
-            return -1 * Float.compare(
-                lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(), normalizedModif.toString()),
-                lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(), normalizedModif.toString()));
-          } catch (NullPointerException e) {
-            return 1;
-          }
+          log.info(String.format("IngredientA: %s, IngredientB: %s", ingredientA.getCode(), ingredientB.getCode()));
+          return -1 * Float.compare(
+              lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(),
+                  normalizedModif.toString()),
+              lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(),
+                  normalizedModif.toString()));
         }
       });
       // end sort
@@ -154,18 +152,19 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   }
 
   private CtElement getNormalizedElement(CtElement elem) {
-    int localVarIndex = getLastIndex(elem);
+    int varIndex = getLastIndex(elem);
     String rawElem = elem.toString();
-    for (CtLocalVariable localVar : elem.getElements(new TypeFilter<CtLocalVariable>(CtLocalVariable.class))) {
+    // フィールド、ローカル変数を正規化。CtRenameGenericVariableRefactoringは重複チェッをが行わないので注意
+    for (CtVariable variable : elem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
       try {
-        new CtRenameLocalVariableRefactoring().setTarget(localVar).setNewName("$" + localVarIndex++).refactor();
+        new CtRenameGenericVariableRefactoring().setTarget(variable).setNewName("$" + varIndex++).refactor();
       } catch (RefactoringException e) {
         e.printStackTrace();
       }
     }
 
     // 最後に割り振ったindexを更新
-    scope2lastIndex.put(getScopeID(elem), localVarIndex);
+    scope2lastIndex.put(getScopeID(elem), varIndex);
 
     // 正規化済みのコードを更新
     raw2normalized.put(rawElem, elem);
