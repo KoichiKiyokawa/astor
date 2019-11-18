@@ -131,7 +131,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     String scopeID = "";
     if (parentClass != null && parentMethod != null) {
       scopeID = parentClass.getSimpleName() + "#" + parentMethod.getSimpleName();
-    } else if (parentMethod == null) {
+    } else if (parentClass != null && parentMethod == null) {
       scopeID = parentClass.getSimpleName();
     }
 
