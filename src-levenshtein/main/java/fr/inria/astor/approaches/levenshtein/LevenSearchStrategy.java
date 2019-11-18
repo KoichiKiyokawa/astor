@@ -165,7 +165,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     int varIndex = getLastIndex(elem);
     String rawElem = elem.toString();
     CtElement clonedElem = elem.clone();
-    // フィールド、ローカル変数を正規化。CtRenameGenericVariableRefactoringは重複チェッをが行わないので注意
+    // フィールド、ローカル変数を正規化。CtRenameGenericVariableRefactoringは重複チェックを行わないので注意
     for (CtVariable variable : clonedElem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
       try {
         new CtRenameGenericVariableRefactoring().setTarget(variable).setNewName("$" + varIndex++).refactor();
