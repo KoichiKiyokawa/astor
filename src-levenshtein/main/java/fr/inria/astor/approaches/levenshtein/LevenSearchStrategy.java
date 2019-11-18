@@ -79,11 +79,21 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
           log.info(String.format("IngredientA: %s, IngredientB: %s", ingredientA.getCode(), ingredientB.getCode()));
-          return -1 * Float.compare(
-              lDis.getDistance(raw2normalized.get(ingredientA.getCode().toString()).toString(),
-                  normalizedModif.toString()),
-              lDis.getDistance(raw2normalized.get(ingredientB.getCode().toString()).toString(),
-                  normalizedModif.toString()));
+
+          String normalizedIngredientAstr, normalizedIngredientBstr;
+          try {
+            normalizedIngredientAstr = raw2normalized.get(ingredientA.getCode().toString()).toString();
+          } catch (NullPointerException e) {
+            normalizedIngredientAstr = ingredientA.getCode().toString();
+          }
+          try {
+            normalizedIngredientBstr = raw2normalized.get(ingredientB.getCode().toString()).toString();
+          } catch (NullPointerException e) {
+            normalizedIngredientBstr = ingredientB.getCode().toString();
+          }
+
+          return -1 * Float.compare(lDis.getDistance(normalizedIngredientAstr, normalizedModif.toString()),
+              lDis.getDistance(normalizedIngredientBstr, normalizedModif.toString()));
         }
       });
       // end sort
