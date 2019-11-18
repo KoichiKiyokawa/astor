@@ -57,7 +57,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       return null;
     }
 
-    CtElement normalizedModif = getNormalizedElement(modificationPoint.clone().getCodeElement());
+    CtElement normalizedModif = getNormalizedElement(modificationPoint.getCodeElement());
     for (Ingredient baseElem : baseElements) {
       getNormalizedElement(baseElem.getCode());
     }
