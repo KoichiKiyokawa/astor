@@ -57,7 +57,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       return null;
     }
 
-    CtElement normalizedModif = getNormalizedElement(modificationPoint.getCodeElement());
+    CtElement normalizedModif = getNormalizedElement(modificationPoint.clone().getCodeElement());
     for (Ingredient baseElem : baseElements) {
       getNormalizedElement(baseElem.getCode());
     }
@@ -164,8 +164,9 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   private CtElement getNormalizedElement(CtElement elem) {
     int varIndex = getLastIndex(elem);
     String rawElem = elem.toString();
+    CtElement clonedElem = elem.clone();
     // フィールド、ローカル変数を正規化。CtRenameGenericVariableRefactoringは重複チェッをが行わないので注意
-    for (CtVariable variable : elem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
+    for (CtVariable variable : clonedElem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
       try {
         new CtRenameGenericVariableRefactoring().setTarget(variable).setNewName("$" + varIndex++).refactor();
       } catch (RefactoringException e) {
@@ -174,11 +175,11 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     }
 
     // 最後に割り振ったindexを更新
-    scope2lastIndex.put(getScopeID(elem), varIndex);
+    scope2lastIndex.put(getScopeID(clonedElem), varIndex);
 
     // 正規化済みのコードを更新
-    raw2normalized.put(rawElem, elem);
+    raw2normalized.put(rawElem, clonedElem);
 
-    return elem;
+    return clonedElem;
   }
 }
