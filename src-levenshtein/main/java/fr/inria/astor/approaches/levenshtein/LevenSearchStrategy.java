@@ -92,6 +92,9 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
             normalizedIngredientBstr = ingredientB.getCode().toString();
           }
 
+          log.info(String.format("sim IngA to modif is %s",lDis.getDistance(normalizedIngredientAstr,normalizedModif.toString())));
+          log.info(String.format("sim IngB to modif is %s",lDis.getDistance(normalizedIngredientBstr,normalizedModif.toString())));
+
           return -1 * Float.compare(lDis.getDistance(normalizedIngredientAstr, normalizedModif.toString()),
               lDis.getDistance(normalizedIngredientBstr, normalizedModif.toString()));
         }
