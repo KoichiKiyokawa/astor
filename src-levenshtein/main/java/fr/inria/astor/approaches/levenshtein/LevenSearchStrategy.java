@@ -38,10 +38,6 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   // 同じ要素を複数回正規化しないように
   private Map<String, CtElement> raw2normalized = new HashMap<>();
 
-  // 変数名を正規化する際に、同じスコープ内で同じ変数名にならないように
-  // <親クラス名#親メソッド名, 最後に割り振ったindex>
-  private Map<String, Integer> scope2lastIndex = new HashMap<>();
-
   protected Logger log = Logger.getLogger(this.getClass().getName());
 
   public LevenSearchStrategy(IngredientPool space) {
@@ -137,48 +133,17 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     return elements;
   }
 
-  private String getScopeID(CtElement elem) {
-    CtClass parentClass = elem.getParent(CtClass.class);
-    CtMethod parentMethod = elem.getParent(CtMethod.class);
-
-    String scopeID = "";
-    if (parentClass != null && parentMethod != null) {
-      scopeID = parentClass.getSimpleName() + "#" + parentMethod.getSimpleName();
-    } else if (parentClass != null && parentMethod == null) {
-      scopeID = parentClass.getSimpleName();
-    }
-
-    log.info("scopeID: " + scopeID);
-
-    return scopeID;
-  }
-
-  private int getLastIndex(CtElement elem) {
-    String scopeID = getScopeID(elem);
-
-    if (scope2lastIndex.containsKey(scopeID)) {
-      return scope2lastIndex.get(scopeID);
-    } else {
-      scope2lastIndex.put(scopeID, 0);
-      return 0;
-    }
-  }
-
   private CtElement getNormalizedElement(CtElement elem) {
-    int varIndex = getLastIndex(elem);
     String rawElem = elem.toString();
     CtElement clonedElem = elem.clone();
     // フィールド、ローカル変数を正規化。CtRenameGenericVariableRefactoringは重複チェックを行わないので注意
     for (CtVariable variable : clonedElem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
       try {
-        new CtRenameGenericVariableRefactoring().setTarget(variable).setNewName("$" + varIndex++).refactor();
+        new CtRenameGenericVariableRefactoring().setTarget(variable).setNewName("$").refactor();
       } catch (RefactoringException e) {
         e.printStackTrace();
       }
     }
-
-    // 最後に割り振ったindexを更新
-    scope2lastIndex.put(getScopeID(clonedElem), varIndex);
 
     // 正規化済みのコードを更新
     raw2normalized.put(rawElem, clonedElem);
