@@ -58,13 +58,6 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       getNormalizedElement(baseElem.getCode());
     }
 
-    // log TODO: delete
-    log.info("Normalized Elements");
-    for (Map.Entry<String, CtElement> entry : raw2normalized.entrySet()) {
-      log.info(entry.getKey() + ":" + entry.getValue().toString());
-      log.info("----------------------");
-    }
-
     // We store the location to avoid sorting the ingredient twice.
     if (!locationsAnalyzed.contains(modificationPoint.getCodeElement())) {
       locationsAnalyzed.add(modificationPoint.getCodeElement());
@@ -74,7 +67,6 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       Collections.sort(baseElements, new Comparator<Ingredient>() {
         @Override
         public int compare(Ingredient ingredientA, Ingredient ingredientB) {
-          log.info(String.format("IngredientA: %s, IngredientB: %s", ingredientA.getCode(), ingredientB.getCode()));
 
           String normalizedIngredientAstr, normalizedIngredientBstr;
           try {
@@ -87,9 +79,6 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
           } catch (NullPointerException e) {
             normalizedIngredientBstr = ingredientB.getCode().toString();
           }
-
-          log.info(String.format("sim IngA to modif is %s",lDis.getDistance(normalizedIngredientAstr,normalizedModif.toString())));
-          log.info(String.format("sim IngB to modif is %s",lDis.getDistance(normalizedIngredientBstr,normalizedModif.toString())));
 
           return -1 * Float.compare(lDis.getDistance(normalizedIngredientAstr, normalizedModif.toString()),
               lDis.getDistance(normalizedIngredientBstr, normalizedModif.toString()));
