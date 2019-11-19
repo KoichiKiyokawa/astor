@@ -135,9 +135,8 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
 
   private CtElement getNormalizedElement(CtElement elem) {
     String rawElem = elem.toString();
-    CtElement clonedElem = elem.clone();
     // フィールド、ローカル変数を正規化。CtRenameGenericVariableRefactoringは重複チェックを行わないので注意
-    for (CtVariable variable : clonedElem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
+    for (CtVariable variable : elem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
       try {
         new CtRenameGenericVariableRefactoring().setTarget(variable).setNewName("$").refactor();
       } catch (RefactoringException e) {
@@ -146,8 +145,8 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     }
 
     // 正規化済みのコードを更新
-    raw2normalized.put(rawElem, clonedElem);
+    raw2normalized.put(rawElem, elem);
 
-    return clonedElem;
+    return elem;
   }
 }
