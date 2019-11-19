@@ -116,7 +116,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 								ingredientA.commitMessage, simA2modif));
 
 						double simB2modif = Transforms.cosineSim(vecingredientB_CommitMessage, vecModificationPointCommitMessage);
-						log.info(String.format("modif: {code: %s, commit: %s}, ingA: {code: %s,commit: %s}, sim: %f",
+						log.info(String.format("modif: {code: %s, commit: %s}, ingB: {code: %s,commit: %s}, sim: %f",
 								modificationPoint.getCodeElement(), modificationPoint.commitMessage, ingredientB.getCodeElement(),
 								ingredientB.commitMessage, simB2modif));
 
