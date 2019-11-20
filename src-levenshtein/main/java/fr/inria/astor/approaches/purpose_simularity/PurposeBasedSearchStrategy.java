@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import spoon.reflect.declaration.CtElement;
-
+import fr.inria.astor.core.entities.HasCommitMessage;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.setup.ConfigurationProperties;
@@ -58,6 +58,10 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 		if (baseElements == null || baseElements.isEmpty()) {
 			return null;
+		}
+
+		for (HasCommitMessage elem : baseElements) {
+			elem.setCommitMessage(this.originalProjectRootDir, this.javaFilePath);
 		}
 
 		// We store the location to avoid sorting the ingredient twice.
@@ -114,15 +118,17 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 						INDArray vecingredientA_CommitMessage = vec.inferVector(ingredientA.commitMessage);
 						INDArray vecingredientB_CommitMessage = vec.inferVector(ingredientB.commitMessage);
 						INDArray vecModificationPointCommitMessage = vec.inferVector(modificationPoint.commitMessage);
-						double simA2modif = Transforms.cosineSim(vecingredientA_CommitMessage, vecModificationPointCommitMessage);
+						double simA2modif = Transforms.cosineSim(vecingredientA_CommitMessage,
+								vecModificationPointCommitMessage);
 						log.info(String.format("modif: {code: %s, commit: %s}, ingA: {code: %s,commit: %s}, sim: %f",
-								modificationPoint.getCodeElement(), modificationPoint.commitMessage, ingredientA.getCodeElement(),
-								ingredientA.commitMessage, simA2modif));
+								modificationPoint.getCodeElement(), modificationPoint.commitMessage,
+								ingredientA.getCodeElement(), ingredientA.commitMessage, simA2modif));
 
-						double simB2modif = Transforms.cosineSim(vecingredientB_CommitMessage, vecModificationPointCommitMessage);
+						double simB2modif = Transforms.cosineSim(vecingredientB_CommitMessage,
+								vecModificationPointCommitMessage);
 						log.info(String.format("modif: {code: %s, commit: %s}, ingB: {code: %s,commit: %s}, sim: %f",
-								modificationPoint.getCodeElement(), modificationPoint.commitMessage, ingredientB.getCodeElement(),
-								ingredientB.commitMessage, simB2modif));
+								modificationPoint.getCodeElement(), modificationPoint.commitMessage,
+								ingredientB.getCodeElement(), ingredientB.commitMessage, simB2modif));
 
 						return -1 * Double.compare(simA2modif, simB2modif);
 					} catch (IOException e) {
