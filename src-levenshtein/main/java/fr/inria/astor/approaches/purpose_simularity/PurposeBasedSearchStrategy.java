@@ -71,6 +71,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 					if (ingredientA.commitMessage.length() == 0) {
 						// ingredientAのコミットメッセージが空だったら、うしろに
+						log.info("ingredientAのコミットメッセージが空");
 						return 1;
 					}
 
@@ -79,11 +80,13 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 						if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
 							// ingredientAもingredientBもmodificationPointと同じコミットメッセージだったら、
 							// とりあえず並び替えずにそのまま
+							log.info("ingredientAもingredientBもmodificationPointと同じコミットメッセージ");
 							return 0;
 						} else {
 							// modificationPointとingredientAのコミットメッセージが同じ かつ
 							// modificationPointとingredientBのコミットメッセージが違う とき、
 							// ingredientAをうしろに
+							log.info("modif = ingA & modif != ingB");
 							return 1;
 						}
 					} else {
@@ -91,6 +94,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 							// modificationPointとingredientAのコミットメッセージが違う かつ
 							// modificationPointとingredientBのコミットメッセージが同じ とき、
 							// そのまま
+							log.info("modif != ingA & modif = ingB");
 							return 0;
 						}
 					}
