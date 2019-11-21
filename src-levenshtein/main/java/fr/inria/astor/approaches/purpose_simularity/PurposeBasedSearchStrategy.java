@@ -45,7 +45,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 	private File getSavedModelFile() {
 		// ex) Math-2 -> math
 		String id = ConfigurationProperties.getProperty("projectIdentifier").split("-")[0].toLowerCase();
-		return new File(String.format("models/%s.txt", id));
+		return new File(String.format("/astor/models/%s.txt", id));
 	}
 
 	@SuppressWarnings("unchecked")
