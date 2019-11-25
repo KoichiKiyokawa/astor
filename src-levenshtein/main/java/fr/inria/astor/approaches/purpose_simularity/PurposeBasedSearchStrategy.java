@@ -75,7 +75,11 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 					if (ingredientA.commitMessage.length() == 0) {
 						// ingredientAのコミットメッセージが空だったら、うしろに
-						log.info("ingredientAのコミットメッセージが空");
+						if (ingredientB.commitMessage.length() == 0) {
+							log.info("ingredientAとB両方ともコミットメッセージが空");
+							return 0;
+						}
+						log.info("ingredientAのコミットメッセージが空, Bは空じゃない");
 						return 1;
 					}
 
