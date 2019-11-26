@@ -74,12 +74,13 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 				public int compare(Ingredient ingredientA, Ingredient ingredientB) {
 
 					if (ingredientA.commitMessage.length() == 0) {
-						// ingredientAのコミットメッセージが空だったら、うしろに
 						if (ingredientB.commitMessage.length() == 0) {
 							log.info("ingredientAとB両方ともコミットメッセージが空");
 							return 0;
 						}
 						log.info("ingredientAのコミットメッセージが空, Bは空じゃない");
+						// ingredientAのコミットメッセージが空かつ、
+						// ingredientBのコミットメッセージが空だったら、Aをうしろに
 						return 1;
 					}
 
@@ -87,7 +88,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 					if (modificationPoint.commitMessage.equals(ingredientA.commitMessage)) {
 						if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
 							// ingredientAもingredientBもmodificationPointと同じコミットメッセージだったら、
-							// とりあえず並び替えずにそのまま
+							// 一致していると定義
 							log.info("ingredientAもingredientBもmodificationPointと同じコミットメッセージ");
 							return 0;
 						} else {
@@ -103,7 +104,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 							// modificationPointとingredientBのコミットメッセージが同じ とき、
 							// そのまま
 							log.info("modif != ingA & modif = ingB");
-							return 0;
+							return -1;
 						}
 					}
 
@@ -136,11 +137,9 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 						return -1 * Double.compare(simA2modif, simB2modif);
 					} catch (IOException e) {
-
 						e.printStackTrace();
 					}
-
-					return 0; // default: no sort
+					return 0; // default no sort
 				}
 			});
 			// end sort
