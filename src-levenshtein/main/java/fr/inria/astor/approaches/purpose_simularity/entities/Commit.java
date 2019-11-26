@@ -31,6 +31,6 @@ public class Commit {
   }
 
   public boolean isCommitedByDefects4j() {
-    return getAuthor().equals("defects4j <defects4j@localhost>");
+    return getAuthor().equals("defects4j");
   }
 }
