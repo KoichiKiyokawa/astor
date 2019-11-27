@@ -7,8 +7,6 @@ import java.util.List;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
-
 import spoon.reflect.declaration.CtElement;
 import fr.inria.astor.core.entities.HasCommitMessage;
 import fr.inria.astor.core.entities.Ingredient;
@@ -33,8 +31,6 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 	public String originalProjectRootDir;
 
 	private List<CtElement> locationsAnalyzed = new ArrayList<>();
-
-	protected Logger log = Logger.getLogger(this.getClass().getName());
 
 	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir, String javaFilePath) {
 		super(space);
@@ -75,10 +71,8 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 					if (ingredientA.commitMessage.length() == 0) {
 						if (ingredientB.commitMessage.length() == 0) {
-							log.info("ingredientAとB両方ともコミットメッセージが空");
 							return 0;
 						}
-						log.info("ingredientAのコミットメッセージが空, Bは空じゃない");
 						// ingredientAのコミットメッセージが空かつ、
 						// ingredientBのコミットメッセージが空だったら、Aをうしろに
 						return 1;
@@ -89,13 +83,11 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 						if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
 							// ingredientAもingredientBもmodificationPointと同じコミットメッセージだったら、
 							// 一致していると定義
-							log.info("ingredientAもingredientBもmodificationPointと同じコミットメッセージ");
 							return 0;
 						} else {
 							// modificationPointとingredientAのコミットメッセージが同じ かつ
 							// modificationPointとingredientBのコミットメッセージが違う とき、
 							// ingredientAをうしろに
-							log.info("modif = ingA & modif != ingB");
 							return 1;
 						}
 					} else {
@@ -103,7 +95,6 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 							// modificationPointとingredientAのコミットメッセージが違う かつ
 							// modificationPointとingredientBのコミットメッセージが同じ とき、
 							// そのまま
-							log.info("modif != ingA & modif = ingB");
 							return -1;
 						}
 					}
@@ -118,22 +109,14 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 						vec.setTokenizerFactory(t);
 						// コサイン類似度を測定
 						// caution! モデルの中に存在していない文章は無理
-						log.info(String.format("ingredientA: %s, ingredientB: %s", ingredientA.commitMessage,
-								ingredientB.commitMessage));
 						INDArray vecingredientA_CommitMessage = vec.inferVector(ingredientA.commitMessage);
 						INDArray vecingredientB_CommitMessage = vec.inferVector(ingredientB.commitMessage);
 						INDArray vecModificationPointCommitMessage = vec.inferVector(modificationPoint.commitMessage);
 						double simA2modif = Transforms.cosineSim(vecingredientA_CommitMessage,
 								vecModificationPointCommitMessage);
-						log.info(String.format("modif: {code: %s, commit: %s}, ingA: {code: %s,commit: %s}, sim: %f",
-								modificationPoint.getCodeElement(), modificationPoint.commitMessage,
-								ingredientA.getCodeElement(), ingredientA.commitMessage, simA2modif));
 
 						double simB2modif = Transforms.cosineSim(vecingredientB_CommitMessage,
 								vecModificationPointCommitMessage);
-						log.info(String.format("modif: {code: %s, commit: %s}, ingB: {code: %s,commit: %s}, sim: %f",
-								modificationPoint.getCodeElement(), modificationPoint.commitMessage,
-								ingredientB.getCodeElement(), ingredientB.commitMessage, simB2modif));
 
 						return -1 * Double.compare(simA2modif, simB2modif);
 					} catch (IOException e) {
