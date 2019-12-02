@@ -67,73 +67,80 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 			locationsAnalyzed.add(modificationPoint.getCodeElement());
 
 			// We have never analyze this location, let's sort the ingredients.
-			Collections.sort(baseElements, new Comparator<Ingredient>() {
-				@Override
-				public int compare(Ingredient ingredientA, Ingredient ingredientB) {
+			try {
+				ParagraphVectors vec = WordVectorSerializer.readParagraphVectors(getSavedModelFile());
+				TokenizerFactory t = new DefaultTokenizerFactory();
+				t.setTokenPreProcessor(new CommonPreprocessor());
+				vec.setTokenizerFactory(t);
+				Collections.sort(baseElements, new Comparator<Ingredient>() {
+					@Override
+					public int compare(Ingredient ingredientA, Ingredient ingredientB) {
 
-					if (ingredientA.commitMessage.length() == 0) {
-						if (ingredientB.commitMessage.length() == 0) {
-							return 0;
-						}
-						// ingredientAのコミットメッセージが空かつ、
-						// ingredientBのコミットメッセージが空だったら、Aをうしろに
-						return 1;
-					}
-
-					// 同じコミットメッセージのものは優先して使わない
-					if (modificationPoint.commitMessage.equals(ingredientA.commitMessage)) {
-						if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
-							// ingredientAもingredientBもmodificationPointと同じコミットメッセージだったら、
-							// 一致していると定義
-							return 0;
-						} else {
-							// modificationPointとingredientAのコミットメッセージが同じ かつ
-							// modificationPointとingredientBのコミットメッセージが違う とき、
-							// ingredientAをうしろに
+						if (ingredientA.commitMessage.length() == 0) {
+							if (ingredientB.commitMessage.length() == 0) {
+								return 0;
+							}
+							// ingredientAのコミットメッセージが空かつ、
+							// ingredientBのコミットメッセージが空だったら、Aをうしろに
 							return 1;
 						}
-					} else {
-						if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
-							// modificationPointとingredientAのコミットメッセージが違う かつ
-							// modificationPointとingredientBのコミットメッセージが同じ とき、
-							// そのまま
-							return -1;
-						}
-					}
 
-					// modificationPointとingredientAのコミットメッセージが違う かつ
-					// modificationPointとingredientBのコミットメッセージが違う とき、
-					// コサイン類似度で並び替える
-					try {
-						ParagraphVectors vec = WordVectorSerializer.readParagraphVectors(getSavedModelFile());
-						TokenizerFactory t = new DefaultTokenizerFactory();
-						t.setTokenPreProcessor(new CommonPreprocessor());
-						vec.setTokenizerFactory(t);
+						// 同じコミットメッセージのものは優先して使わない
+						if (modificationPoint.commitMessage.equals(ingredientA.commitMessage)) {
+							if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
+								// ingredientAもingredientBもmodificationPointと同じコミットメッセージだったら、
+								// 一致していると定義
+								return 0;
+							} else {
+								// modificationPointとingredientAのコミットメッセージが同じ かつ
+								// modificationPointとingredientBのコミットメッセージが違う とき、
+								// ingredientAをうしろに
+								return 1;
+							}
+						} else {
+							if (modificationPoint.commitMessage.equals(ingredientB.commitMessage)) {
+								// modificationPointとingredientAのコミットメッセージが違う かつ
+								// modificationPointとingredientBのコミットメッセージが同じ とき、
+								// そのまま
+								return -1;
+							}
+						}
+
+						// modificationPointとingredientAのコミットメッセージが違う かつ
+						// modificationPointとingredientBのコミットメッセージが違う とき、
+						// コサイン類似度で並び替える
+
 						// コサイン類似度を測定
 						// caution! モデルの中に存在していない文章は無理
-						INDArray vecingredientA_CommitMessage = vec.inferVector(ingredientA.commitMessage);
-						INDArray vecingredientB_CommitMessage = vec.inferVector(ingredientB.commitMessage);
-						INDArray vecModificationPointCommitMessage = vec.inferVector(modificationPoint.commitMessage);
-						double simA2modif = Transforms.cosineSim(vecingredientA_CommitMessage,
-								vecModificationPointCommitMessage);
+						try {
+							INDArray vecingredientA_CommitMessage = vec.inferVector(ingredientA.commitMessage);
+							INDArray vecingredientB_CommitMessage = vec.inferVector(ingredientB.commitMessage);
+							INDArray vecModifCommitMessage = vec.inferVector(modificationPoint.commitMessage);
+							double simA2modif = Transforms.cosineSim(vecingredientA_CommitMessage,
+									vecModifCommitMessage);
 
-						double simB2modif = Transforms.cosineSim(vecingredientB_CommitMessage,
-								vecModificationPointCommitMessage);
+							double simB2modif = Transforms.cosineSim(vecingredientB_CommitMessage,
+									vecModifCommitMessage);
 
-						return -1 * Double.compare(simA2modif, simB2modif);
-					} catch (org.nd4j.linalg.exception.ND4JIllegalStateException e) {
-						log.info(String.format("model does not have the commit message. IngredientA: %s, IngredientB: %s", ingredientA.commitMessage, ingredientB.commitMessage));
-					} catch (IOException e) {
-						e.printStackTrace();
+							return -1 * Double.compare(simA2modif, simB2modif);
+						} catch (org.nd4j.linalg.exception.ND4JIllegalStateException e) {
+							// モデル内にコミットメッセージが存在しなかったとき
+							log.info(String.format(
+									"model does not have the commit message. IngredientA: %s, IngredientB: %s",
+									ingredientA.commitMessage, ingredientB.commitMessage));
+						}
+						return 0; // default
 					}
-					return 0; // default no sort
-				}
-			});
-			// end sort
+				});
+				// end sort
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 			// We reintroduce the sorted list ingredient into the space
 			this.ingredientSpace.setIngredients(modificationPoint.getCodeElement(), baseElements);
 		}
+
 		int size = baseElements.size();
 		if (size > 0) {
 			// We get the smaller element
