@@ -32,6 +32,8 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 	private List<CtElement> locationsAnalyzed = new ArrayList<>();
 
+	protected org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass().getName());
+
 	public PurposeBasedSearchStrategy(IngredientPool space, String originalProjectRootDir, String javaFilePath) {
 		super(space);
 		this.javaFilePath = javaFilePath;
@@ -119,6 +121,8 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 								vecModificationPointCommitMessage);
 
 						return -1 * Double.compare(simA2modif, simB2modif);
+					} catch (org.nd4j.linalg.exception.ND4JIllegalStateException e) {
+						log.info(String.format("model does not have the commit message. IngredientA: %s, IngredientB: %s", ingredientA.commitMessage, ingredientB.commitMessage));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
