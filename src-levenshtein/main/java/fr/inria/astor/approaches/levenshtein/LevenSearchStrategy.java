@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.SerializationUtils;
+
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.LevensteinDistance;
 
@@ -123,9 +125,10 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   }
 
   private CtElement getNormalizedElement(CtElement elem) {
-    String rawElem = elem.toString();
+    CtElement clonedElem = (CtElement) SerializationUtils.clone(elem);
+    String rawElemStr = clonedElem.toString();
     // フィールド、ローカル変数を正規化。CtRenameGenericVariableRefactoringは重複チェックを行わないので注意
-    for (CtVariable variable : elem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
+    for (CtVariable variable : clonedElem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
       try {
         new CtRenameGenericVariableRefactoring().setTarget(variable).setNewName("$").refactor();
       } catch (RefactoringException e) {
@@ -134,7 +137,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     }
 
     // 正規化済みのコードを更新
-    raw2normalized.put(rawElem, elem);
+    raw2normalized.put(rawElemStr, elem);
 
     return elem;
   }
