@@ -92,8 +92,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
       this.ingredientSpace.setIngredients(modificationPoint.getCodeElement(), baseElements);
     }
 
-    int size = baseElements.size();
-    if (size > 0) {
+    if (baseElements.size() > 0) {
       // We get the smaller element
       Ingredient ingredient = baseElements.get(0);
       // we remove it from space
@@ -137,7 +136,7 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     }
 
     // 正規化済みのコードを更新
-    raw2normalized.put(rawElemStr, elem);
+    raw2normalized.put(rawElemStr, clonedElem);
 
     return elem;
   }

@@ -59,7 +59,7 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 			return null;
 		}
 
-    // set commit message to baseElements
+		// set commit message to baseElements
 		for (HasCommitMessage elem : baseElements) {
 			elem.setCommitMessage(this.originalProjectRootDir, this.javaFilePath);
 		}
@@ -126,8 +126,8 @@ public class PurposeBasedSearchStrategy extends IngredientSearchStrategy {
 
 							return -1 * Double.compare(simA2modif, simB2modif);
 						} catch (org.nd4j.linalg.exception.ND4JIllegalStateException e) {
-              // モデル内にコミットメッセージが存在しなかったとき
-              // Defects4jによるコミットメッセージが混ざっているときに起きてしまう。
+							// モデル内にコミットメッセージが存在しなかったとき
+							// Defects4jによるコミットメッセージが混ざっているときに起きてしまう。
 							log.info(String.format(
 									"model does not have the commit message. IngredientA: %s, IngredientB: %s",
 									ingredientA.commitMessage, ingredientB.commitMessage));
