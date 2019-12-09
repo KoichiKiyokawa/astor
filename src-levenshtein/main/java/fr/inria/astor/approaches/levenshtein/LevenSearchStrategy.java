@@ -7,14 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.SerializationUtils;
-
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.spell.LevensteinDistance;
 
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.reflect.declaration.CtVariable;
-import spoon.refactoring.CtRenameGenericVariableRefactoring;
 import spoon.refactoring.RefactoringException;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtClass;
@@ -124,12 +121,13 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
   }
 
   private CtElement getNormalizedElement(CtElement elem) {
-    CtElement clonedElem = (CtElement) SerializationUtils.clone(elem);
+    CtElement clonedElem = elem.clone();
     String rawElemStr = clonedElem.toString();
+
     // フィールド、ローカル変数を正規化。CtRenameGenericVariableRefactoringは重複チェックを行わないので注意
     for (CtVariable variable : clonedElem.getElements(new TypeFilter<CtVariable>(CtVariable.class))) {
       try {
-        new CtRenameGenericVariableRefactoring().setTarget(variable).setNewName("$").refactor();
+        variable.setSimpleName("$");
       } catch (RefactoringException e) {
         e.printStackTrace();
       }
@@ -138,6 +136,6 @@ public class LevenSearchStrategy extends IngredientSearchStrategy {
     // 正規化済みのコードを更新
     raw2normalized.put(rawElemStr, clonedElem);
 
-    return elem;
+    return clonedElem;
   }
 }
