@@ -47,7 +47,7 @@ public abstract class HasCommitMessage {
 		if (commits.get(0).isCommitedByDefects4j()) {
 			Commit developerCommit = pickDeveloperBugCommit(commits);
 			if (developerCommit == null) {
-				log.error("No developer message");
+				log.debug("No developer message");
 				this.commitMessage = "";
 			} else {
 				this.commitMessage = developerCommit.getMessage();
